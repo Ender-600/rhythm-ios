@@ -6,43 +6,47 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		CFABD5A72F0FC30900236A48 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = CFABD5A62F0FC30900236A48 /* Supabase */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		CFF1FD0C2F075B1B00DC01DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CFF1FCF42F075B1800DC01DD /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CFF1FCFB2F075B1800DC01DD;
-			remoteInfo = Rythm;
+			remoteInfo = Rhythm;
 		};
 		CFF1FD162F075B1B00DC01DD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = CFF1FCF42F075B1800DC01DD /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = CFF1FCFB2F075B1800DC01DD;
-			remoteInfo = Rythm;
+			remoteInfo = Rhythm;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		CFF1FCFC2F075B1800DC01DD /* Rythm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rythm.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		CFF1FD0B2F075B1B00DC01DD /* RythmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RythmTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		CFF1FD152F075B1B00DC01DD /* RythmUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RythmUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFF1FCFC2F075B1800DC01DD /* Rhythm.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Rhythm.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFF1FD0B2F075B1B00DC01DD /* RhythmTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RhythmTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		CFF1FD152F075B1B00DC01DD /* RhythmUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RhythmUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		CFF1FCFE2F075B1800DC01DD /* Rythm */ = {
+		CFF1FCFE2F075B1800DC01DD /* Rhythm */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Rythm;
+			path = Rhythm;
 			sourceTree = "<group>";
 		};
-		CFF1FD0E2F075B1B00DC01DD /* RythmTests */ = {
+		CFF1FD0E2F075B1B00DC01DD /* RhythmTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RythmTests;
+			path = RhythmTests;
 			sourceTree = "<group>";
 		};
-		CFF1FD182F075B1B00DC01DD /* RythmUITests */ = {
+		CFF1FD182F075B1B00DC01DD /* RhythmUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = RythmUITests;
+			path = RhythmUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CFABD5A72F0FC30900236A48 /* Supabase in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,12 +77,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		CFABD5A52F0FC30800236A48 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		CFF1FCF32F075B1800DC01DD = {
 			isa = PBXGroup;
 			children = (
-				CFF1FCFE2F075B1800DC01DD /* Rythm */,
-				CFF1FD0E2F075B1B00DC01DD /* RythmTests */,
-				CFF1FD182F075B1B00DC01DD /* RythmUITests */,
+				CFF1FCFE2F075B1800DC01DD /* Rhythm */,
+				CFF1FD0E2F075B1B00DC01DD /* RhythmTests */,
+				CFF1FD182F075B1B00DC01DD /* RhythmUITests */,
+				CFABD5A52F0FC30800236A48 /* Frameworks */,
 				CFF1FCFD2F075B1800DC01DD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -85,9 +98,9 @@
 		CFF1FCFD2F075B1800DC01DD /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CFF1FCFC2F075B1800DC01DD /* Rythm.app */,
-				CFF1FD0B2F075B1B00DC01DD /* RythmTests.xctest */,
-				CFF1FD152F075B1B00DC01DD /* RythmUITests.xctest */,
+				CFF1FCFC2F075B1800DC01DD /* Rhythm.app */,
+				CFF1FD0B2F075B1B00DC01DD /* RhythmTests.xctest */,
+				CFF1FD152F075B1B00DC01DD /* RhythmUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -95,9 +108,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		CFF1FCFB2F075B1800DC01DD /* Rythm */ = {
+		CFF1FCFB2F075B1800DC01DD /* Rhythm */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CFF1FD1F2F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "Rythm" */;
+			buildConfigurationList = CFF1FD1F2F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "Rhythm" */;
 			buildPhases = (
 				CFF1FCF82F075B1800DC01DD /* Sources */,
 				CFF1FCF92F075B1800DC01DD /* Frameworks */,
@@ -108,18 +121,19 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				CFF1FCFE2F075B1800DC01DD /* Rythm */,
+				CFF1FCFE2F075B1800DC01DD /* Rhythm */,
 			);
-			name = Rythm;
+			name = Rhythm;
 			packageProductDependencies = (
+				CFABD5A62F0FC30900236A48 /* Supabase */,
 			);
-			productName = Rythm;
-			productReference = CFF1FCFC2F075B1800DC01DD /* Rythm.app */;
+			productName = Rhythm;
+			productReference = CFF1FCFC2F075B1800DC01DD /* Rhythm.app */;
 			productType = "com.apple.product-type.application";
 		};
-		CFF1FD0A2F075B1B00DC01DD /* RythmTests */ = {
+		CFF1FD0A2F075B1B00DC01DD /* RhythmTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CFF1FD222F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RythmTests" */;
+			buildConfigurationList = CFF1FD222F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RhythmTests" */;
 			buildPhases = (
 				CFF1FD072F075B1B00DC01DD /* Sources */,
 				CFF1FD082F075B1B00DC01DD /* Frameworks */,
@@ -131,18 +145,18 @@
 				CFF1FD0D2F075B1B00DC01DD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CFF1FD0E2F075B1B00DC01DD /* RythmTests */,
+				CFF1FD0E2F075B1B00DC01DD /* RhythmTests */,
 			);
-			name = RythmTests;
+			name = RhythmTests;
 			packageProductDependencies = (
 			);
-			productName = RythmTests;
-			productReference = CFF1FD0B2F075B1B00DC01DD /* RythmTests.xctest */;
+			productName = RhythmTests;
+			productReference = CFF1FD0B2F075B1B00DC01DD /* RhythmTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		CFF1FD142F075B1B00DC01DD /* RythmUITests */ = {
+		CFF1FD142F075B1B00DC01DD /* RhythmUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CFF1FD252F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RythmUITests" */;
+			buildConfigurationList = CFF1FD252F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RhythmUITests" */;
 			buildPhases = (
 				CFF1FD112F075B1B00DC01DD /* Sources */,
 				CFF1FD122F075B1B00DC01DD /* Frameworks */,
@@ -154,13 +168,13 @@
 				CFF1FD172F075B1B00DC01DD /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				CFF1FD182F075B1B00DC01DD /* RythmUITests */,
+				CFF1FD182F075B1B00DC01DD /* RhythmUITests */,
 			);
-			name = RythmUITests;
+			name = RhythmUITests;
 			packageProductDependencies = (
 			);
-			productName = RythmUITests;
-			productReference = CFF1FD152F075B1B00DC01DD /* RythmUITests.xctest */;
+			productName = RhythmUITests;
+			productReference = CFF1FD152F075B1B00DC01DD /* RhythmUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -186,7 +200,7 @@
 					};
 				};
 			};
-			buildConfigurationList = CFF1FCF72F075B1800DC01DD /* Build configuration list for PBXProject "Rythm" */;
+			buildConfigurationList = CFF1FCF72F075B1800DC01DD /* Build configuration list for PBXProject "Rhythm" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -195,14 +209,17 @@
 			);
 			mainGroup = CFF1FCF32F075B1800DC01DD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				CFE483872F0FA68300713118 /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CFF1FCFD2F075B1800DC01DD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				CFF1FCFB2F075B1800DC01DD /* Rythm */,
-				CFF1FD0A2F075B1B00DC01DD /* RythmTests */,
-				CFF1FD142F075B1B00DC01DD /* RythmUITests */,
+				CFF1FCFB2F075B1800DC01DD /* Rhythm */,
+				CFF1FD0A2F075B1B00DC01DD /* RhythmTests */,
+				CFF1FD142F075B1B00DC01DD /* RhythmUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,12 +275,12 @@
 /* Begin PBXTargetDependency section */
 		CFF1FD0D2F075B1B00DC01DD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CFF1FCFB2F075B1800DC01DD /* Rythm */;
+			target = CFF1FCFB2F075B1800DC01DD /* Rhythm */;
 			targetProxy = CFF1FD0C2F075B1B00DC01DD /* PBXContainerItemProxy */;
 		};
 		CFF1FD172F075B1B00DC01DD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = CFF1FCFB2F075B1800DC01DD /* Rythm */;
+			target = CFF1FCFB2F075B1800DC01DD /* Rhythm */;
 			targetProxy = CFF1FD162F075B1B00DC01DD /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -397,6 +414,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rhythm uses your microphone to capture voice input for creating tasks and planning your day.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Rhythm uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -407,7 +426,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.Rythm";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.Rhythm";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -428,6 +447,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rhythm uses your microphone to capture voice input for creating tasks and planning your day.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Rhythm uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -438,7 +459,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.Rythm";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.Rhythm";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -459,7 +480,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RythmTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RhythmTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -467,7 +488,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rythm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rythm";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhythm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rhythm";
 			};
 			name = Debug;
 		};
@@ -480,7 +501,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RythmTests";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RhythmTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -488,7 +509,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rythm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rythm";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Rhythm.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Rhythm";
 			};
 			name = Release;
 		};
@@ -499,7 +520,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RythmUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RhythmUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -507,7 +528,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Rythm;
+				TEST_TARGET_NAME = Rhythm;
 			};
 			name = Debug;
 		};
@@ -518,7 +539,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RythmUITests";
+				PRODUCT_BUNDLE_IDENTIFIER = "Ender-600.RhythmUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -526,14 +547,14 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Rythm;
+				TEST_TARGET_NAME = Rhythm;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CFF1FCF72F075B1800DC01DD /* Build configuration list for PBXProject "Rythm" */ = {
+		CFF1FCF72F075B1800DC01DD /* Build configuration list for PBXProject "Rhythm" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CFF1FD1D2F075B1B00DC01DD /* Debug */,
@@ -542,7 +563,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CFF1FD1F2F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "Rythm" */ = {
+		CFF1FD1F2F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "Rhythm" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CFF1FD202F075B1B00DC01DD /* Debug */,
@@ -551,7 +572,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CFF1FD222F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RythmTests" */ = {
+		CFF1FD222F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RhythmTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CFF1FD232F075B1B00DC01DD /* Debug */,
@@ -560,7 +581,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		CFF1FD252F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RythmUITests" */ = {
+		CFF1FD252F075B1B00DC01DD /* Build configuration list for PBXNativeTarget "RhythmUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CFF1FD262F075B1B00DC01DD /* Debug */,
@@ -570,6 +591,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		CFE483872F0FA68300713118 /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CFABD5A62F0FC30900236A48 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CFE483872F0FA68300713118 /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CFF1FCF42F075B1800DC01DD /* Project object */;
 }

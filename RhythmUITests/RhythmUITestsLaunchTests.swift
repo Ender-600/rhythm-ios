@@ -1,13 +1,13 @@
 //
-//  RythmUITestsLaunchTests.swift
-//  RythmUITests
+//  RhythmUITestsLaunchTests.swift
+//  RhythmUITests
 //
 //  Created by 刘柏宇 on 1/1/26.
 //
 
 import XCTest
 
-final class RythmUITestsLaunchTests: XCTestCase {
+final class RhythmUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CFF1FCFB2F075B1800DC01DD"
-               BuildableName = "Rythm.app"
-               BlueprintName = "Rythm"
-               ReferencedContainer = "container:Rythm.xcodeproj">
+               BuildableName = "Rhythm.app"
+               BlueprintName = "Rhythm"
+               ReferencedContainer = "container:Rhythm.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CFF1FD0A2F075B1B00DC01DD"
-               BuildableName = "RythmTests.xctest"
-               BlueprintName = "RythmTests"
-               ReferencedContainer = "container:Rythm.xcodeproj">
+               BuildableName = "RhythmTests.xctest"
+               BlueprintName = "RhythmTests"
+               ReferencedContainer = "container:Rhythm.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "CFF1FD142F075B1B00DC01DD"
-               BuildableName = "RythmUITests.xctest"
-               BlueprintName = "RythmUITests"
-               ReferencedContainer = "container:Rythm.xcodeproj">
+               BuildableName = "RhythmUITests.xctest"
+               BlueprintName = "RhythmUITests"
+               ReferencedContainer = "container:Rhythm.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -69,9 +69,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CFF1FCFB2F075B1800DC01DD"
-            BuildableName = "Rythm.app"
-            BlueprintName = "Rythm"
-            ReferencedContainer = "container:Rythm.xcodeproj">
+            BuildableName = "Rhythm.app"
+            BlueprintName = "Rhythm"
+            ReferencedContainer = "container:Rhythm.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -86,9 +86,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "CFF1FCFB2F075B1800DC01DD"
-            BuildableName = "Rythm.app"
-            BlueprintName = "Rythm"
-            ReferencedContainer = "container:Rythm.xcodeproj">
+            BuildableName = "Rhythm.app"
+            BlueprintName = "Rhythm"
+            ReferencedContainer = "container:Rhythm.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
