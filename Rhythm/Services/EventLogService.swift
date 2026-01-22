@@ -72,7 +72,14 @@ final class EventLogService {
             "active_seconds": task.totalActiveSeconds
         ])
     }
-    
+
+    /// Log task resumed
+    func logTaskResumed(_ task: RhythmTask) {
+        log(.taskResumed, taskId: task.id, metadata: [
+            "active_seconds": task.totalActiveSeconds
+        ])
+    }
+
     /// Log task completed
     func logTaskCompleted(_ task: RhythmTask) {
         log(.taskCompleted, taskId: task.id, metadata: [
@@ -94,7 +101,7 @@ final class EventLogService {
     /// Log task snoozed
     func logTaskSnoozed(_ task: RhythmTask, option: SnoozeOption, newTime: Date?) {
         var metadata: [String: Any] = [
-            "snooze_option": option.rawValue,
+            "snooze_option": option.id,
             "snooze_count": task.snoozeCount
         ]
         if let time = newTime {
@@ -102,7 +109,19 @@ final class EventLogService {
         }
         log(.taskSnoozed, taskId: task.id, metadata: metadata)
     }
-    
+
+    /// Log task rescheduled
+    func logTaskRescheduled(_ task: RhythmTask) {
+        var metadata: [String: Any] = [:]
+        if let start = task.windowStart {
+            metadata["new_start_time"] = ISO8601DateFormatter().string(from: start)
+        }
+        if let end = task.windowEnd {
+            metadata["new_end_time"] = ISO8601DateFormatter().string(from: end)
+        }
+        log(.taskRescheduled, taskId: task.id, metadata: metadata)
+    }
+
     /// Log voice input started
     func logVoiceInputStarted() {
         log(.voiceInputStarted)

@@ -78,7 +78,7 @@ final class QuickAddViewModel {
     
     // MARK: - Types
     
-    enum FlowState {
+    enum FlowState: Equatable {
         case idle                    // Ready to start
         case recording               // Voice input active
         case processing              // Parsing with LLM
@@ -602,7 +602,7 @@ final class QuickAddViewModel {
             
         case .complete:
             task.complete()
-            eventLogService.logTaskCompleted(task, context: [:])
+            eventLogService.logTaskCompleted(task)
             
         case .skip:
             task.skip()
@@ -612,18 +612,23 @@ final class QuickAddViewModel {
             context.delete(task)
             
         case .snooze:
+            let snoozeOption: SnoozeOption
             if let params = currentUpdateIntent?.parameters {
                 if let duration = params.snoozeDuration {
-                    task.snooze(for: SnoozeOption.custom(Int(duration / 60)))
+                    snoozeOption = SnoozeOption.custom(Int(duration / 60))
+                    task.snooze(for: snoozeOption)
                 } else if let until = params.snoozeUntil {
                     task.snoozeUntil(until)
+                    snoozeOption = .custom(Int(until.timeIntervalSinceNow / 60))
                 } else {
-                    task.snooze(for: .fifteenMinutes)
+                    snoozeOption = .fifteenMinutes
+                    task.snooze(for: snoozeOption)
                 }
             } else {
-                task.snooze(for: .fifteenMinutes)
+                snoozeOption = .fifteenMinutes
+                task.snooze(for: snoozeOption)
             }
-            eventLogService.logTaskSnoozed(task, option: .fifteenMinutes)
+            eventLogService.logTaskSnoozed(task, option: snoozeOption, newTime: task.windowStart)
             
         case .reschedule:
             if let params = currentUpdateIntent?.parameters,
@@ -670,7 +675,7 @@ final class QuickAddViewModel {
                 eventLogService.logTaskResumed(task)
             case .complete:
                 task.complete()
-                eventLogService.logTaskCompleted(task, context: [:])
+                eventLogService.logTaskCompleted(task)
             case .skip:
                 task.skip()
                 eventLogService.logTaskSkipped(task)
@@ -678,7 +683,7 @@ final class QuickAddViewModel {
                 context.delete(task)
             case .snooze:
                 task.snooze(for: .fifteenMinutes)
-                eventLogService.logTaskSnoozed(task, option: .fifteenMinutes)
+                eventLogService.logTaskSnoozed(task, option: .fifteenMinutes, newTime: task.windowStart)
             case .reschedule:
                 break // Not supported for batch
             }

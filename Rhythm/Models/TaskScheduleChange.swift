@@ -61,7 +61,7 @@ final class TaskScheduleChange {
         self.newWindowStart = newWindowStart
         self.newWindowEnd = newWindowEnd
         self.reason = reason
-        self.snoozeOption = snoozeOption?.rawValue
+        self.snoozeOption = snoozeOption?.id
         self.wasUserInitiated = wasUserInitiated
         self.serverId = nil
         self.dirtyFlag = true

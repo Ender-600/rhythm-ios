@@ -213,10 +213,15 @@ struct SnoozeSheet: View {
                     }
                     
                     SnoozeButton(
-                        option: .custom,
-                        isSelected: selectedOption == .custom
+                        option: .custom(60),
+                        isSelected: {
+                            if case .custom = selectedOption {
+                                return true
+                            }
+                            return false
+                        }()
                     ) {
-                        selectedOption = .custom
+                        selectedOption = .custom(60)
                     }
                 }
                 .padding(.horizontal)

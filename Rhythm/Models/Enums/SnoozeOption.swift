@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum SnoozeOption: Codable, Identifiable, Equatable {
+enum SnoozeOption: Codable, Identifiable, Equatable, Hashable {
     case tenMinutes
     case fifteenMinutes
     case thirtyMinutes

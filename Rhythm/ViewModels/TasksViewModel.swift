@@ -185,8 +185,10 @@ final class TasksViewModel {
     }
     
     func snoozeTaskToCustomTime(_ task: RhythmTask, start: Date, end: Date?) {
-        task.snooze(to: start, newEnd: end, option: .custom)
-        eventLogService.logTaskSnoozed(task, option: .custom, newTime: start)
+        let minutesFromNow = Int(start.timeIntervalSinceNow / 60)
+        let snoozeOption = SnoozeOption.custom(minutesFromNow)
+        task.snooze(to: start, newEnd: end, option: snoozeOption)
+        eventLogService.logTaskSnoozed(task, option: snoozeOption, newTime: start)
         
         Task {
             await notificationScheduler.rescheduleNotifications(for: task)
