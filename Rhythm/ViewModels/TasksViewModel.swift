@@ -23,6 +23,7 @@ final class TasksViewModel {
     var selectedTask: RhythmTask?
     var showingSnoozeSheet = false
     var showingCompletionSheet = false
+    var showingAddSheet = false
     
     // MARK: - Dependencies
     
@@ -120,6 +121,41 @@ final class TasksViewModel {
     /// Summary counts
     var taskCounts: (notStarted: Int, inProgress: Int, done: Int) {
         (notStartedTasks.count, inProgressTasks.count, doneTasks.count)
+    }
+    
+    // MARK: - Task Creation
+    
+    func addTask(
+        title: String,
+        estimatedMinutes: Int,
+        deadline: Date,
+        priority: TaskPriority,
+        openingAction: String? = nil,
+        notes: String? = nil
+    ) {
+        guard let context = modelContext else {
+            showingAddSheet = false
+            return
+        }
+        
+        let task = RhythmTask(
+            title: title,
+            priority: priority,
+            openingAction: openingAction
+        )
+        task.estimatedMinutes = estimatedMinutes
+        task.deadline = deadline
+        task.notes = notes
+        
+        context.insert(task)
+        eventLogService.logTaskCreated(task)
+        
+        try? context.save()
+        
+        // Immediately add to tasks array for instant UI update
+        tasks.insert(task, at: 0)
+        
+        showingAddSheet = false
     }
     
     // MARK: - Task Actions

@@ -70,6 +70,19 @@ struct TasksView: View {
                     .presentationDetents([.medium])
                 }
             }
+            .sheet(isPresented: $viewModel.showingAddSheet) {
+                AddTaskSheet(viewModel: viewModel)
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        viewModel.showingAddSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                            .foregroundColor(.rhythmCoral)
+                    }
+                }
+            }
         }
     }
     
@@ -217,7 +230,7 @@ struct TasksView: View {
         EmptyStateView(
             icon: "checkmark.circle",
             title: Copy.Tasks.allDone,
-            message: "Add tasks using the Quick Add button"
+            message: "Tap + to add a new task"
         )
     }
 }
