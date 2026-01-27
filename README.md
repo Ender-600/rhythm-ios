@@ -130,7 +130,7 @@ User Voice → SpeechService → PlanningService (API) → ViewModel → SwiftDa
 
 ### Planned
 
-- [ ] Backend integration (FastAPI)
+- [ ] Backend integration (Supabase)
 - [ ] Push notifications (APNs)
 - [ ] Memory/retrospective features
 - [ ] Pattern learning
