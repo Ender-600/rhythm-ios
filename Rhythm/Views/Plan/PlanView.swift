@@ -2,8 +2,10 @@
 //  PlanView.swift
 //  Rhythm
 //
-//  Day/Week/Month plan view
-//  Shows a "plan sketch" - flexible, not rigid
+//  Plan view with three modes:
+//  - Today: 24-hour vertical timeline
+//  - 3 Days: Horizontal scrolling columns
+//  - Month: Calendar grid overview
 //
 
 import SwiftUI
@@ -22,27 +24,23 @@ struct PlanView: View {
                 Color.rhythmBackground(for: colorScheme)
                     .ignoresSafeArea()
                 
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Greeting and summary
+                VStack(spacing: 0) {
+                    // Header with greeting and period selector
+                    VStack(alignment: .leading, spacing: 16) {
                         headerSection
-                        
-                        // Period selector
                         periodSelector
-                        
-                        // Plan content
-                        if viewModel.isLoading {
-                            LoadingView(message: "Loading your rhythm...")
-                        } else {
-                            planContent
-                        }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .padding(.bottom, 100)
-                }
-                .refreshable {
-                    await viewModel.refresh()
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
+                    
+                    // Plan content (takes remaining space)
+                    if viewModel.isLoading {
+                        LoadingView(message: "Loading your rhythm...")
+                            .frame(maxHeight: .infinity)
+                    } else {
+                        planContent
+                    }
                 }
             }
             .navigationTitle("")
@@ -70,9 +68,9 @@ struct PlanView: View {
     // MARK: - Header Section
     
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 4) {
             Text(Copy.greeting)
-                .font(.title)
+                .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.rhythmTextPrimary)
             
@@ -88,32 +86,37 @@ struct PlanView: View {
         HStack(spacing: 0) {
             ForEach(PlanViewModel.PlanPeriod.allCases, id: \.self) { period in
                 Button {
-                    Task {
-                        await viewModel.selectPeriod(period)
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        viewModel.selectPeriod(period)
                     }
                 } label: {
-                    Text(period.rawValue)
-                        .font(.subheadline)
-                        .fontWeight(viewModel.selectedPeriod == period ? .semibold : .regular)
-                        .foregroundColor(
-                            viewModel.selectedPeriod == period
-                                ? .rhythmCoral
-                                : .rhythmTextSecondary
-                        )
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            viewModel.selectedPeriod == period
-                                ? Color.rhythmCoral.opacity(0.15)
-                                : Color.clear
-                        )
-                        .clipShape(Capsule())
+                    HStack(spacing: 6) {
+                        Image(systemName: period.icon)
+                            .font(.caption)
+                        
+                        Text(period.rawValue)
+                            .font(.subheadline)
+                            .fontWeight(viewModel.selectedPeriod == period ? .semibold : .regular)
+                    }
+                    .foregroundColor(
+                        viewModel.selectedPeriod == period
+                            ? .rhythmCoral
+                            : .rhythmTextSecondary
+                    )
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(
+                        viewModel.selectedPeriod == period
+                            ? Color.rhythmCoral.opacity(0.15)
+                            : Color.clear
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
             }
         }
         .padding(4)
         .background(Color.rhythmCard(for: colorScheme))
-        .clipShape(Capsule())
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
     
     // MARK: - Plan Content
@@ -121,9 +124,33 @@ struct PlanView: View {
     @ViewBuilder
     private var planContent: some View {
         switch viewModel.selectedPeriod {
-        case .day:
-            PlanSketchView(
-                tasks: viewModel.tasks,
+        case .today:
+            // 24-hour vertical timeline
+            TodayTimelineView(
+                tasks: viewModel.todayTasks,
+                onTaskTap: { task in
+                    selectedTask = task
+                    showingTaskDetail = true
+                },
+                onSnooze: { task in
+                    selectedTask = task
+                    showingSnoozeSheet = true
+                },
+                onStart: { task in
+                    viewModel.startTask(task)
+                }
+            )
+            .refreshable {
+                await viewModel.refresh()
+            }
+            
+        case .nearFuture:
+            // 3-column horizontal scrolling view
+            ThreeDayView(
+                dateRange: viewModel.dateRangeForThreeDayView(),
+                tasksProvider: { date in
+                    viewModel.tasksForDate(date)
+                },
                 onTaskTap: { task in
                     selectedTask = task
                     showingTaskDetail = true
@@ -137,11 +164,16 @@ struct PlanView: View {
                 }
             )
             
-        case .week, .month:
-            PrioritySectionsView(
-                urgentTasks: viewModel.urgentTasks,
-                normalTasks: viewModel.normalTasks,
-                lowTasks: viewModel.lowTasks,
+        case .monthOverview:
+            // Month calendar grid
+            MonthOverviewView(
+                months: viewModel.monthsForMonthView(),
+                tasksForMonth: { month in
+                    viewModel.tasksForMonth(month)
+                },
+                onDayTap: { date in
+                    // Could switch to today view for that date
+                },
                 onTaskTap: { task in
                     selectedTask = task
                     showingTaskDetail = true

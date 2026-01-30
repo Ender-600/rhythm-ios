@@ -47,6 +47,22 @@ enum Copy {
         static let emptyWeek = "A quiet week ahead"
         static let emptyMonth = "Plenty of space this month"
         
+        // View tabs
+        static let todayTab = "Today"
+        static let threeDaysTab = "3 Days"
+        static let monthTab = "Month"
+        
+        // Today timeline
+        static let emptyTimeline = "Your timeline is clear"
+        static let freeSlot = "Free time"
+        
+        // Three day view
+        static let freeDay = "Free day"
+        static let allDone = "All done"
+        
+        // Month view
+        static let tasksCount = "tasks"
+        
         static let urgentSection = "Urgent"
         static let normalSection = "Normal"
         static let lowSection = "Low Priority"
