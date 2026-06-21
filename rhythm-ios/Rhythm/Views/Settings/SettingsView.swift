@@ -15,7 +15,8 @@ struct SettingsView: View {
     
     @State private var showingClearConfirmation = false
     
-    var syncService: SyncService?
+    @Bindable var authService: AuthService
+    @Bindable var syncService: SyncService
     
     var body: some View {
         NavigationStack {
@@ -24,6 +25,39 @@ struct SettingsView: View {
                     .ignoresSafeArea()
                 
                 List {
+                    // Account
+                    Section("Account") {
+                        if authService.isAuthenticated {
+                            HStack {
+                                Label("Signed in", systemImage: "person.crop.circle.badge.checkmark")
+                                Spacer()
+                                Text(authService.userEmail ?? "Cloud account")
+                                    .font(.caption)
+                                    .foregroundColor(.rhythmTextSecondary)
+                            }
+
+                            Button {
+                                Task {
+                                    try? await authService.signOut()
+                                    syncService.setCloudSyncEnabled(false)
+                                }
+                            } label: {
+                                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                                    .foregroundColor(.rhythmError)
+                            }
+                        } else {
+                            Text("Rhythm works locally on this device. Sign in only if you want cloud sync.")
+                                .font(.subheadline)
+                                .foregroundColor(.rhythmTextSecondary)
+
+                            NavigationLink {
+                                AuthView(authService: authService)
+                            } label: {
+                                Label("Sign In for Cloud Sync", systemImage: "person.crop.circle")
+                            }
+                        }
+                    }
+
                     // Notifications
                     Section(Copy.Settings.notificationsSection) {
                         // Morning preview time
@@ -58,23 +92,46 @@ struct SettingsView: View {
                     
                     // Data
                     Section(Copy.Settings.dataSection) {
+                        Toggle(isOn: Binding(
+                            get: { syncService.isCloudSyncEnabled },
+                            set: { syncService.setCloudSyncEnabled($0) }
+                        )) {
+                            Label("Cloud Sync", systemImage: "icloud")
+                        }
+                        .disabled(!authService.isAuthenticated)
+
+                        if !authService.isAuthenticated {
+                            Text("Cloud sync requires sign in. Your local data stays available either way.")
+                                .font(.caption)
+                                .foregroundColor(.rhythmTextMuted)
+                        }
+
                         // Sync status
                         HStack {
                             Label(Copy.Settings.syncStatus, systemImage: "arrow.triangle.2.circlepath")
                             Spacer()
-                            if let sync = syncService {
+                            if syncService.isCloudSyncEnabled {
                                 SyncStatusBadge(
-                                    isSyncing: sync.isSyncing,
-                                    pendingCount: sync.pendingTaskCount + sync.pendingEventCount,
-                                    lastSyncTime: sync.lastSyncTime
+                                    isSyncing: syncService.isSyncing,
+                                    pendingCount: syncService.pendingTaskCount + syncService.pendingEventCount,
+                                    lastSyncTime: syncService.lastSyncTime
                                 )
                             } else {
-                                Text("Not configured")
+                                Text("Local only")
                                     .font(.caption)
                                     .foregroundColor(.rhythmTextMuted)
                             }
                         }
                         
+                        Button {
+                            Task {
+                                await syncService.syncAll()
+                            }
+                        } label: {
+                            Label("Sync Now", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                        .disabled(!authService.isAuthenticated || !syncService.isCloudSyncEnabled || syncService.isSyncing)
+
                         // Export data
                         Button {
                             // TODO: Implement data export
@@ -158,6 +215,9 @@ struct SettingsView: View {
 // MARK: - Preview
 
 #Preview {
-    SettingsView()
+    let auth = AuthService()
+    SettingsView(
+        authService: auth,
+        syncService: SyncService(authService: auth)
+    )
 }
-

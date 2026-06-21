@@ -22,35 +22,12 @@ enum AppConfig {
     
     /// API timeout in seconds
     static let apiTimeout: TimeInterval = 30
+
+    /// Backend endpoint for voice/text intent parsing.
+    static let parseEndpointPath = "api/v1/parse"
     
     /// Whether to use mock responses when offline
     static let useMockWhenOffline = true
-    
-    // MARK: - LLM Configuration
-    
-    /// OpenAI API Key (from environment or hardcoded for dev)
-    static var openAIAPIKey: String {
-        ProcessInfo.processInfo.environment["OPENAI_API_KEY"] ?? ""
-    }
-    
-    /// OpenAI Base URL
-    static var openAIBaseURL: URL {
-        if let urlString = ProcessInfo.processInfo.environment["OPENAI_BASE_URL"],
-           let url = URL(string: urlString) {
-            return url
-        }
-        return URL(string: "https://api.openai.com/v1")!
-    }
-    
-    /// LLM model to use
-    static var llmModel: String {
-        ProcessInfo.processInfo.environment["LLM_MODEL"] ?? "gpt-4o-mini"
-    }
-    
-    /// Whether to use LLM for intent parsing (vs fallback local parsing)
-    static var useLLMForIntentParsing: Bool {
-        !openAIAPIKey.isEmpty
-    }
     
     // MARK: - Voice Configuration
     
@@ -203,4 +180,3 @@ extension AppConfig {
         isRelativeToNow: true
     )
 }
-

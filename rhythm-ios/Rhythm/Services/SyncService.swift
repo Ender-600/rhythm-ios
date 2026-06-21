@@ -7,6 +7,8 @@ import Supabase
 @Observable
 @MainActor
 final class SyncService {
+    private static let cloudSyncEnabledKey = "cloudSyncEnabled"
+
     // MARK: - Published State
     private(set) var isSyncing = false
     private(set) var lastSyncTime: Date?
@@ -14,6 +16,7 @@ final class SyncService {
     private(set) var pendingEventCount = 0
     private(set) var isOnline = true
     private(set) var lastError: SyncError?
+    private(set) var isCloudSyncEnabled: Bool
     
     // MARK: - Private Properties
     private var modelContext: ModelContext?
@@ -25,6 +28,7 @@ final class SyncService {
     
     // MARK: - Types
     enum SyncError: LocalizedError {
+        case cloudSyncDisabled
         case notAuthenticated
         case offline
         case databaseError(String)
@@ -32,6 +36,7 @@ final class SyncService {
         
         var errorDescription: String? {
             switch self {
+            case .cloudSyncDisabled: return "cloud sync is off"
             case .notAuthenticated: return "please sign in first"
             case .offline: return "offline. changes are saved locally"
             case .databaseError(let msg): return "database error: \(msg)"
@@ -43,6 +48,7 @@ final class SyncService {
     // MARK: - Initialization
     init(authService: AuthService) {
         self.authService = authService
+        self.isCloudSyncEnabled = UserDefaults.standard.bool(forKey: Self.cloudSyncEnabledKey)
         self.pathMonitor = NWPathMonitor()
         startNetworkMonitoring()
     }
@@ -58,7 +64,25 @@ final class SyncService {
         Task {
             await refreshPendingCounts()
         }
-        startPeriodicSync()
+        if isCloudSyncEnabled {
+            startPeriodicSync()
+        }
+    }
+
+    func setCloudSyncEnabled(_ enabled: Bool) {
+        isCloudSyncEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: Self.cloudSyncEnabledKey)
+
+        if enabled {
+            startPeriodicSync()
+            Task {
+                await syncAll()
+            }
+        } else {
+            syncTimer?.invalidate()
+            syncTimer = nil
+            lastError = nil
+        }
     }
     
     // MARK: - Network Monitoring
@@ -68,7 +92,7 @@ final class SyncService {
                 let wasOffline = self?.isOnline == false
                 self?.isOnline = path.status == .satisfied
                 
-                if wasOffline && path.status == .satisfied {
+                if wasOffline && path.status == .satisfied && self?.isCloudSyncEnabled == true {
                     await self?.syncAll()
                 }
             }
@@ -79,8 +103,9 @@ final class SyncService {
     // MARK: - Periodic Sync
     private func startPeriodicSync() {
         syncTimer?.invalidate()
+        guard isCloudSyncEnabled else { return }
         syncTimer = Timer.scheduledTimer(
-            withTimeInterval: 60.0, 
+            withTimeInterval: AppConfig.syncInterval,
             repeats: true
         ) { [weak self] _ in
             Task { @MainActor in
@@ -92,6 +117,10 @@ final class SyncService {
     // MARK: - Sync Methods
     func syncAll() async {
         guard !isSyncing else { return }
+        guard isCloudSyncEnabled else {
+            lastError = .cloudSyncDisabled
+            return
+        }
         guard isOnline else {
             lastError = .offline
             return
