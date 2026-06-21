@@ -124,4 +124,8 @@ final class AuthService {
         guard let user = currentUser else { return nil }
         return UUID(uuidString: user.id.uuidString)
     }
+
+    var userEmail: String? {
+        currentUser?.email
+    }
 }

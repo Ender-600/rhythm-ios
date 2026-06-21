@@ -2,11 +2,55 @@
 //  LLMService.swift
 //  Rhythm
 //
-//  Service for parsing voice input using LLM (OpenAI/Claude)
-//  Handles intent classification and entity extraction
+//  Backend client for parsing voice input.
+//  Python backend owns LLM calls and agent orchestration.
 //
 
 import Foundation
+
+private struct ParseIntentRequest: Encodable {
+    let utterance: String
+    let existingTasks: [ParseIntentTaskContext]
+    let locale: String
+    let timezone: String
+    let localTime: String
+
+    enum CodingKeys: String, CodingKey {
+        case utterance
+        case existingTasks = "existing_tasks"
+        case locale
+        case timezone
+        case localTime = "local_time"
+    }
+}
+
+private struct ParseIntentTaskContext: Encodable {
+    let id: UUID
+    let title: String
+    let status: String
+    let priority: String
+    let windowStart: String?
+    let windowEnd: String?
+
+    init(task: RhythmTask) {
+        let formatter = ISO8601DateFormatter()
+        self.id = task.id
+        self.title = task.title
+        self.status = task.statusRaw
+        self.priority = task.priorityRaw
+        self.windowStart = task.windowStart.map { formatter.string(from: $0) }
+        self.windowEnd = task.windowEnd.map { formatter.string(from: $0) }
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case title
+        case status
+        case priority
+        case windowStart = "window_start"
+        case windowEnd = "window_end"
+    }
+}
 
 @Observable
 @MainActor
@@ -19,9 +63,7 @@ final class LLMService {
     // MARK: - Private Properties
     
     private let session: URLSession
-    private let apiKey: String
     private let baseURL: URL
-    private let model: String
     
     // MARK: - Types
     
@@ -36,7 +78,7 @@ final class LLMService {
         var errorDescription: String? {
             switch self {
             case .noAPIKey:
-                return "API key not configured"
+                return "Backend is not configured"
             case .networkError(let msg):
                 return "Network error: \(msg)"
             case .invalidResponse:
@@ -54,16 +96,12 @@ final class LLMService {
     // MARK: - Initialization
     
     init(
-        apiKey: String = AppConfig.openAIAPIKey,
-        baseURL: URL = AppConfig.openAIBaseURL,
-        model: String = AppConfig.llmModel
+        baseURL: URL = AppConfig.apiBaseURL
     ) {
-        self.apiKey = apiKey
         self.baseURL = baseURL
-        self.model = model
         
         let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForRequest = AppConfig.apiTimeout
         self.session = URLSession(configuration: config)
     }
     
@@ -71,18 +109,13 @@ final class LLMService {
     
     /// Parse user's voice input and return all intents (supports multiple)
     func parseIntents(from utterance: String, existingTasks: [RhythmTask] = []) async -> VoiceIntentResult {
-        guard !apiKey.isEmpty else {
-            lastError = .noAPIKey
-            return generateFallbackIntentResult(from: utterance)
-        }
-        
         isProcessing = true
         lastError = nil
         
         defer { isProcessing = false }
         
         do {
-            let response = try await callLLM(utterance: utterance, existingTasks: existingTasks)
+            let response = try await callBackend(utterance: utterance, existingTasks: existingTasks)
             return response.toVoiceIntentResult(rawUtterance: utterance)
         } catch let error as LLMError {
             lastError = error
@@ -106,31 +139,23 @@ final class LLMService {
         }
     }
     
-    // MARK: - LLM Call
+    // MARK: - Backend Call
     
-    private func callLLM(utterance: String, existingTasks: [RhythmTask]) async throws -> LLMIntentResponse {
-        let url = baseURL.appendingPathComponent("chat/completions")
+    private func callBackend(utterance: String, existingTasks: [RhythmTask]) async throws -> LLMIntentResponse {
+        let url = baseURL.appendingPathComponent(AppConfig.parseEndpointPath)
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let systemPrompt = buildSystemPrompt(existingTasks: existingTasks)
-        let userPrompt = buildUserPrompt(utterance: utterance)
-        
-        let body: [String: Any] = [
-            "model": model,
-            "messages": [
-                ["role": "system", "content": systemPrompt],
-                ["role": "user", "content": userPrompt]
-            ],
-            "response_format": ["type": "json_object"],
-            "temperature": 0.3,
-            "max_tokens": 1000
-        ]
-        
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+        let body = ParseIntentRequest(
+            utterance: utterance,
+            existingTasks: existingTasks.prefix(20).map(ParseIntentTaskContext.init(task:)),
+            locale: Locale.current.identifier,
+            timezone: TimeZone.current.identifier,
+            localTime: ISO8601DateFormatter().string(from: Date())
+        )
+        request.httpBody = try JSONEncoder().encode(body)
         
         let (data, response) = try await session.data(for: request)
         
@@ -147,23 +172,8 @@ final class LLMService {
             throw LLMError.serverError(httpResponse.statusCode)
         }
         
-        // Parse OpenAI response
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let choices = json["choices"] as? [[String: Any]],
-              let firstChoice = choices.first,
-              let message = firstChoice["message"] as? [String: Any],
-              let content = message["content"] as? String else {
-            throw LLMError.invalidResponse
-        }
-        
-        // Parse the JSON content from the LLM
-        guard let contentData = content.data(using: .utf8) else {
-            throw LLMError.parsingFailed("Invalid content encoding")
-        }
-        
         do {
-            let intentResponse = try JSONDecoder().decode(LLMIntentResponse.self, from: contentData)
-            return intentResponse
+            return try JSONDecoder().decode(LLMIntentResponse.self, from: data)
         } catch {
             throw LLMError.parsingFailed(error.localizedDescription)
         }

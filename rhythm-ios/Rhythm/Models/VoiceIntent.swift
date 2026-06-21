@@ -336,6 +336,13 @@ extension LLMIntentResponse {
     func toVoiceIntentResult(rawUtterance: String) -> VoiceIntentResult {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        let fallbackDateFormatter = ISO8601DateFormatter()
+        fallbackDateFormatter.formatOptions = [.withInternetDateTime]
+
+        func parseDate(_ value: String?) -> Date? {
+            guard let value else { return nil }
+            return dateFormatter.date(from: value) ?? fallbackDateFormatter.date(from: value)
+        }
         
         // Parse all create intents
         var createIntents: [CreateTaskIntent] = []
@@ -344,8 +351,8 @@ extension LLMIntentResponse {
                 // Parse schedule window
                 var scheduleWindow: ScheduleWindow? = nil
                 if let desc = data.scheduleDescription {
-                    let startDate = data.scheduleStart.flatMap { dateFormatter.date(from: $0) }
-                    let endDate = data.scheduleEnd.flatMap { dateFormatter.date(from: $0) }
+                    let startDate = parseDate(data.scheduleStart)
+                    let endDate = parseDate(data.scheduleEnd)
                     scheduleWindow = ScheduleWindow(
                         start: startDate,
                         end: endDate,
@@ -355,7 +362,7 @@ extension LLMIntentResponse {
                 }
                 
                 // Parse deadline
-                let deadline = data.deadline.flatMap { dateFormatter.date(from: $0) }
+                let deadline = parseDate(data.deadline)
                 
                 // Parse priority
                 let priority = TaskPriority(rawValue: data.priority ?? "normal") ?? .normal
@@ -396,8 +403,8 @@ extension LLMIntentResponse {
                 if action == .snooze || action == .reschedule {
                     var newSchedule: ScheduleWindow? = nil
                     if let desc = data.newScheduleDescription {
-                        let startDate = data.newScheduleStart.flatMap { dateFormatter.date(from: $0) }
-                        let endDate = data.newScheduleEnd.flatMap { dateFormatter.date(from: $0) }
+                        let startDate = parseDate(data.newScheduleStart)
+                        let endDate = parseDate(data.newScheduleEnd)
                         newSchedule = ScheduleWindow(
                             start: startDate,
                             end: endDate,
@@ -406,7 +413,7 @@ extension LLMIntentResponse {
                         )
                     }
                     
-                    let snoozeUntil = data.snoozeUntil.flatMap { dateFormatter.date(from: $0) }
+                    let snoozeUntil = parseDate(data.snoozeUntil)
                     let snoozeDuration = data.snoozeDuration.map { TimeInterval($0 * 60) }
                     
                     parameters = ActionParameters(

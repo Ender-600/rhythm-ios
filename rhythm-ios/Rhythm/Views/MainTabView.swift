@@ -16,6 +16,7 @@ struct MainTabView: View {
     let speechService: SpeechService
     let eventLogService: EventLogService
     let notificationScheduler: NotificationScheduler
+    let authService: AuthService
     let syncService: SyncService
     
     // State
@@ -89,7 +90,7 @@ struct MainTabView: View {
                 .tag(Tab.memory)
             
             // Settings tab
-            SettingsView(syncService: syncService)
+            SettingsView(authService: authService, syncService: syncService)
                 .tabItem {
                     Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
                 }
@@ -177,11 +178,12 @@ struct MainTabView: View {
 // MARK: - Preview
 
 #Preview {
+    let auth = AuthService()
     MainTabView(
         speechService: SpeechService(),
         eventLogService: EventLogService(),
         notificationScheduler: NotificationScheduler(),
-        syncService: SyncService(authService: AuthService())
+        authService: auth,
+        syncService: SyncService(authService: auth)
     )
 }
-
