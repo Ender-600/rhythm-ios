@@ -74,6 +74,7 @@ final class QuickAddViewModel {
     private let llmService: LLMService
     private let eventLogService: EventLogService
     private let notificationScheduler: NotificationScheduler
+    private let calendarService: CalendarService?
     private var modelContext: ModelContext?
     
     // MARK: - Types
@@ -114,12 +115,14 @@ final class QuickAddViewModel {
         speechService: SpeechService,
         eventLogService: EventLogService,
         notificationScheduler: NotificationScheduler,
+        calendarService: CalendarService? = nil,
         llmService: LLMService? = nil
     ) {
         self.speechService = speechService
         self.llmService = llmService ?? LLMService()
         self.eventLogService = eventLogService
         self.notificationScheduler = notificationScheduler
+        self.calendarService = calendarService
     }
     
     func configure(with modelContext: ModelContext) {
@@ -543,6 +546,8 @@ final class QuickAddViewModel {
             // Schedule notifications
             await notificationScheduler.scheduleWindowStart(for: task)
             await notificationScheduler.scheduleWindowEnd(for: task)
+
+            addToAppleCalendarIfNeeded(task, context: context)
             
             savedTasks.append(task)
         } catch {
@@ -638,12 +643,46 @@ final class QuickAddViewModel {
                 eventLogService.logTaskRescheduled(task)
             }
         }
+
+        updateAppleCalendarIfNeeded(for: task, context: context)
         
         do {
             try context.save()
             updatedTasks.append(task)
         } catch {
             saveError = "Couldn't update: \(error.localizedDescription)"
+        }
+    }
+
+    private func addToAppleCalendarIfNeeded(_ task: RhythmTask, context: ModelContext) {
+        guard UserDefaults.standard.bool(forKey: CalendarService.addRhythmPlansToAppleCalendarKey),
+              task.windowStart != nil,
+              let calendarService,
+              calendarService.accessLevel.canWrite else {
+            return
+        }
+
+        do {
+            try calendarService.upsertCalendarEvent(for: task)
+            try context.save()
+        } catch {
+            print("Failed to add task to Apple Calendar: \(error)")
+        }
+    }
+
+    private func updateAppleCalendarIfNeeded(for task: RhythmTask, context: ModelContext) {
+        guard task.windowStart != nil,
+              task.appleCalendarEventIdentifier != nil || UserDefaults.standard.bool(forKey: CalendarService.addRhythmPlansToAppleCalendarKey),
+              let calendarService,
+              calendarService.accessLevel.canWrite else {
+            return
+        }
+
+        do {
+            try calendarService.upsertCalendarEvent(for: task)
+            try context.save()
+        } catch {
+            print("Failed to update Apple Calendar event: \(error)")
         }
     }
     

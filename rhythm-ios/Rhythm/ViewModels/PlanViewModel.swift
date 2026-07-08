@@ -2,7 +2,7 @@
 //  PlanViewModel.swift
 //  Rhythm
 //
-//  ViewModel for the Plan view (Today/3-Day/Month views)
+//  ViewModel for the zoomable Plan calendar
 //  Shows a "plan sketch" - flexible, not rigid
 //
 
@@ -14,34 +14,52 @@ import SwiftData
 final class PlanViewModel {
     // MARK: - Published State
     
-    var selectedPeriod: PlanPeriod = .today
+    var zoomLevel: ZoomLevel = .day
+    var focusedDate: Date = Date()
     private(set) var allTasks: [RhythmTask] = []
     private(set) var isLoading = false
-    
-    // State for three-day view (center date for horizontal scrolling)
-    var threeDayCenterDate: Date = Date()
-    
-    // State for month view (current visible month)
-    var selectedMonth: Date = Date()
     
     // MARK: - Dependencies
     
     private var modelContext: ModelContext?
     private let notificationScheduler: NotificationScheduler
     private let eventLogService: EventLogService
+    private let calendarService: CalendarService?
     
     // MARK: - Types
     
-    enum PlanPeriod: String, CaseIterable {
-        case today = "Today"
-        case nearFuture = "3 Days"
-        case monthOverview = "Month"
+    enum ZoomLevel: Int, CaseIterable {
+        case month
+        case week
+        case day
+
+        var title: String {
+            switch self {
+            case .month: return "Month"
+            case .week: return "Week"
+            case .day: return "Day"
+            }
+        }
         
         var icon: String {
             switch self {
-            case .today: return "sun.max"
-            case .nearFuture: return "calendar.day.timeline.left"
-            case .monthOverview: return "calendar"
+            case .month: return "calendar"
+            case .week: return "calendar.day.timeline.left"
+            case .day: return "clock"
+            }
+        }
+    }
+
+    enum PlanCreationError: LocalizedError {
+        case missingModelContext
+        case invalidTimeRange
+
+        var errorDescription: String? {
+            switch self {
+            case .missingModelContext:
+                return "The planner is not ready yet."
+            case .invalidTimeRange:
+                return "Choose an end time after the start time."
             }
         }
     }
@@ -63,10 +81,12 @@ final class PlanViewModel {
     
     init(
         notificationScheduler: NotificationScheduler,
-        eventLogService: EventLogService
+        eventLogService: EventLogService,
+        calendarService: CalendarService? = nil
     ) {
         self.notificationScheduler = notificationScheduler
         self.eventLogService = eventLogService
+        self.calendarService = calendarService
     }
     
     func configure(with modelContext: ModelContext) {
@@ -167,9 +187,13 @@ final class PlanViewModel {
     
     // MARK: - Convenience Properties
     
-    /// Tasks for today (used by TodayTimelineView)
+    /// Tasks for today (used by actions that are explicitly about today)
     var todayTasks: [RhythmTask] {
         tasksForDate(Date())
+    }
+
+    var focusedDayTasks: [RhythmTask] {
+        tasksForDate(focusedDate)
     }
     
     // MARK: - Computed Properties
@@ -227,12 +251,26 @@ final class PlanViewModel {
     
     /// Summary text for the period
     var summaryText: String {
-        let tasks = todayTasks
+        let tasks: [RhythmTask]
+
+        switch zoomLevel {
+        case .day:
+            tasks = focusedDayTasks
+        case .week:
+            tasks = weekDates(containing: focusedDate).flatMap(tasksForDate)
+        case .month:
+            tasks = tasksForMonth(focusedDate).values.flatMap { $0 }
+        }
+
         let total = tasks.count
-        let urgent = urgentTasks.count
+        let urgent = tasks.filter { $0.priority == .urgent }.count
         
         if total == 0 {
-            return "Your day is wide open"
+            switch zoomLevel {
+            case .day: return "This day is wide open"
+            case .week: return "This week is wide open"
+            case .month: return "This month is wide open"
+            }
         }
         
         var parts: [String] = []
@@ -278,23 +316,109 @@ final class PlanViewModel {
         try? modelContext?.save()
         await loadAllTasks()
     }
-    
-    // MARK: - Period Selection
-    
-    func selectPeriod(_ period: PlanPeriod) {
-        selectedPeriod = period
+
+    @discardableResult
+    func createPlan(
+        title: String,
+        start: Date,
+        end: Date,
+        priority: TaskPriority,
+        openingAction: String?,
+        notes: String?
+    ) async throws -> RhythmTask {
+        guard let context = modelContext else {
+            throw PlanCreationError.missingModelContext
+        }
+        guard end > start else {
+            throw PlanCreationError.invalidTimeRange
+        }
+
+        let task = RhythmTask(
+            title: title,
+            windowStart: start,
+            windowEnd: end,
+            priority: priority,
+            openingAction: openingAction
+        )
+        task.estimatedMinutes = max(1, Int(end.timeIntervalSince(start) / 60))
+        task.notes = notes
+
+        context.insert(task)
+        try context.save()
+
+        eventLogService.logTaskCreated(task)
+        await notificationScheduler.scheduleWindowStart(for: task)
+        await notificationScheduler.scheduleWindowEnd(for: task)
+
+        if UserDefaults.standard.bool(forKey: CalendarService.addRhythmPlansToAppleCalendarKey),
+           let calendarService,
+           calendarService.accessLevel.canWrite {
+            do {
+                try calendarService.upsertCalendarEvent(for: task)
+                try context.save()
+            } catch {
+                print("Failed to add plan to Apple Calendar: \(error)")
+            }
+        }
+
+        await loadAllTasks()
+
+        return task
     }
     
-    // MARK: - Navigation Helpers
+    // MARK: - Calendar Navigation
+
+    var canZoomIn: Bool { zoomLevel != .day }
+
+    var canZoomOut: Bool { zoomLevel != .month }
+
+    func zoomIn(focusing date: Date? = nil) {
+        if let date {
+            focusedDate = Calendar.current.startOfDay(for: date)
+        }
+
+        guard let next = ZoomLevel(rawValue: zoomLevel.rawValue + 1) else { return }
+        zoomLevel = next
+    }
+
+    func zoomOut() {
+        guard let next = ZoomLevel(rawValue: zoomLevel.rawValue - 1) else { return }
+        zoomLevel = next
+    }
+
+    func focus(on date: Date, zoomTo level: ZoomLevel? = nil) {
+        focusedDate = Calendar.current.startOfDay(for: date)
+        if let level {
+            zoomLevel = level
+        }
+    }
+
+    func weekDates(containing date: Date) -> [Date] {
+        let calendar = Calendar.current
+        guard let interval = calendar.dateInterval(of: .weekOfYear, for: date) else {
+            return [calendar.startOfDay(for: date)]
+        }
+
+        return (0..<7).compactMap { offset in
+            calendar.date(byAdding: .day, value: offset, to: interval.start)
+        }
+    }
+
+    var focusedRangeTitle: String {
+        switch zoomLevel {
+        case .day:
+            return focusedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())
+        case .week:
+            let dates = weekDates(containing: focusedDate)
+            guard let first = dates.first, let last = dates.last else { return "" }
+            return "\(first.formatted(.dateTime.month(.abbreviated).day())) - \(last.formatted(.dateTime.month(.abbreviated).day()))"
+        case .month:
+            return focusedDate.formatted(.dateTime.month(.wide).year())
+        }
+    }
     
-    /// Move three-day view to show today/tomorrow/day-after-tomorrow
     func resetToToday() {
-        threeDayCenterDate = Date()
-    }
-    
-    /// Move month view to current month
-    func resetToCurrentMonth() {
-        selectedMonth = Date()
+        focusedDate = Date()
     }
 }
 
@@ -342,33 +466,6 @@ extension PlanViewModel {
         busyHours(for: Date())
     }
     
-    /// Generate date range for three-day view (extended for scrolling)
-    func dateRangeForThreeDayView(daysBeforeToday: Int = 30, daysAfterToday: Int = 60) -> [Date] {
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
-        
-        var dates: [Date] = []
-        
-        // Days before today
-        for i in (1...daysBeforeToday).reversed() {
-            if let date = calendar.date(byAdding: .day, value: -i, to: today) {
-                dates.append(date)
-            }
-        }
-        
-        // Today
-        dates.append(today)
-        
-        // Days after today
-        for i in 1...daysAfterToday {
-            if let date = calendar.date(byAdding: .day, value: i, to: today) {
-                dates.append(date)
-            }
-        }
-        
-        return dates
-    }
-    
     /// Generate months for month view (for infinite scrolling)
     func monthsForMonthView(monthsBefore: Int = 12, monthsAfter: Int = 12) -> [Date] {
         let calendar = Calendar.current
@@ -396,4 +493,3 @@ extension PlanViewModel {
         return months
     }
 }
-

@@ -59,6 +59,11 @@ final class RhythmTask {
     var serverId: String?
     var dirtyFlag: Bool
     var lastSyncedAt: Date?
+
+    // MARK: - Apple Calendar
+
+    var appleCalendarEventIdentifier: String?
+    var appleCalendarSyncedAt: Date?
     
     // MARK: - Relationships
     
@@ -108,6 +113,8 @@ final class RhythmTask {
         self.serverId = nil
         self.dirtyFlag = true
         self.lastSyncedAt = nil
+        self.appleCalendarEventIdentifier = nil
+        self.appleCalendarSyncedAt = nil
         self.tags = []
         self.scheduleChanges = []
     }
@@ -283,4 +290,3 @@ extension RhythmTask {
         self.lastSyncedAt = Date()
     }
 }
-
