@@ -32,7 +32,7 @@ open Rhythm.xcodeproj
 
 ### 2. Configure Backend (Optional)
 
-The app works offline-first. To connect to the backend API:
+The app works offline-first. Voice intent parsing calls the Python backend at `RHYTHM_API_URL` and falls back to local parsing if the request fails.
 
 1. Set the environment variable `RHYTHM_API_URL` to your backend URL
 2. Or modify `AppConfig.swift` to change the default URL
@@ -40,6 +40,13 @@ The app works offline-first. To connect to the backend API:
 ```swift
 // Default: http://localhost:8000
 static var apiBaseURL: URL { ... }
+```
+
+Start the backend from the repo root:
+
+```bash
+cd rhythm-backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 3. Build and Run
@@ -258,4 +265,3 @@ POST /api/v1/events/batch
 ---
 
 Built with ❤️ for gentle productivity.
-
