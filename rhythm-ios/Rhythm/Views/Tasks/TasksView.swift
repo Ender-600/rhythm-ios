@@ -2,7 +2,7 @@
 //  TasksView.swift
 //  Rhythm
 //
-//  Board + List view toggle for all tasks
+//  Prioritized vertical task list
 //
 
 import SwiftUI
@@ -21,9 +21,6 @@ struct TasksView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Toolbar
-                    toolbar
-                    
                     // Content
                     if viewModel.isLoading {
                         LoadingView(message: "Loading tasks...")
@@ -86,99 +83,13 @@ struct TasksView: View {
         }
     }
     
-    // MARK: - Toolbar
-    
-    private var toolbar: some View {
-        HStack {
-            // View mode toggle
-            HStack(spacing: 0) {
-                ForEach(TasksViewModel.ViewMode.allCases, id: \.self) { mode in
-                    Button {
-                        viewModel.viewMode = mode
-                    } label: {
-                        Image(systemName: mode.icon)
-                            .font(.subheadline)
-                            .foregroundColor(
-                                viewModel.viewMode == mode
-                                    ? .rhythmCoral
-                                    : .rhythmTextSecondary
-                            )
-                            .padding(.horizontal, 12)
-                            .padding(.vertical, 8)
-                            .background(
-                                viewModel.viewMode == mode
-                                    ? Color.rhythmCoral.opacity(0.15)
-                                    : Color.clear
-                            )
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                    }
-                }
-            }
-            .padding(4)
-            .background(Color.rhythmCard(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            
-            Spacer()
-            
-            // Task counts
-            HStack(spacing: 12) {
-                countBadge(viewModel.taskCounts.notStarted, color: .rhythmTextSecondary)
-                countBadge(viewModel.taskCounts.inProgress, color: .rhythmCoral)
-                countBadge(viewModel.taskCounts.done, color: .rhythmSuccess)
-            }
-            
-            Spacer()
-            
-            // Sort menu
-            Menu {
-                ForEach(TasksViewModel.SortOption.allCases, id: \.self) { option in
-                    Button {
-                        Task {
-                            await viewModel.setSortOption(option)
-                        }
-                    } label: {
-                        HStack {
-                            Text(option.rawValue)
-                            if viewModel.sortOption == option {
-                                Image(systemName: "checkmark")
-                            }
-                        }
-                    }
-                }
-            } label: {
-                Image(systemName: "arrow.up.arrow.down")
-                    .font(.subheadline)
-                    .foregroundColor(.rhythmTextSecondary)
-                    .padding(8)
-                    .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(Circle())
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-    }
-    
-    private func countBadge(_ count: Int, color: Color) -> some View {
-        Text("\(count)")
-            .font(.caption)
-            .fontWeight(.medium)
-            .foregroundColor(color)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(color.opacity(0.15))
-            .clipShape(Capsule())
-    }
-    
     // MARK: - Task Content
     
     @ViewBuilder
     private var taskContent: some View {
-        switch viewModel.viewMode {
-        case .board:
-            TaskBoardView(
-                notStartedTasks: viewModel.notStartedTasks,
-                inProgressTasks: viewModel.inProgressTasks,
-                doneTasks: viewModel.doneTasks,
+        ScrollView {
+            TaskListView(
+                tasks: viewModel.tasks,
                 onTaskTap: { task in
                     selectedTask = task
                     showingTaskDetail = true
@@ -192,35 +103,17 @@ struct TasksView: View {
                 onTaskSnooze: { task in
                     viewModel.selectedTask = task
                     viewModel.showingSnoozeSheet = true
+                },
+                onTaskDelete: { task in
+                    viewModel.deleteTask(task)
+                },
+                onMove: { source, destination in
+                    viewModel.moveTasks(from: source, to: destination)
                 }
             )
-            
-        case .list:
-            ScrollView {
-                TaskListView(
-                    tasks: viewModel.tasks,
-                    onTaskTap: { task in
-                        selectedTask = task
-                        showingTaskDetail = true
-                    },
-                    onTaskStart: { task in
-                        viewModel.startTask(task)
-                    },
-                    onTaskComplete: { task in
-                        viewModel.showCompletionFlow(for: task)
-                    },
-                    onTaskSnooze: { task in
-                        viewModel.selectedTask = task
-                        viewModel.showingSnoozeSheet = true
-                    },
-                    onTaskDelete: { task in
-                        viewModel.deleteTask(task)
-                    }
-                )
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .padding(.bottom, 100)
-            }
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 100)
         }
     }
     
@@ -382,4 +275,3 @@ struct CompletionSheet: View {
         )
     )
 }
-

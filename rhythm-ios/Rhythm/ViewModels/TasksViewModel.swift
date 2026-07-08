@@ -2,7 +2,7 @@
 //  TasksViewModel.swift
 //  Rhythm
 //
-//  ViewModel for the Tasks view (Board + List)
+//  ViewModel for the prioritized Tasks list
 //  All actions logged for learning
 //
 
@@ -14,8 +14,6 @@ import SwiftData
 final class TasksViewModel {
     // MARK: - Published State
     
-    var viewMode: ViewMode = .board
-    var sortOption: SortOption = .window
     private(set) var tasks: [RhythmTask] = []
     private(set) var isLoading = false
     
@@ -30,27 +28,6 @@ final class TasksViewModel {
     private var modelContext: ModelContext?
     private let eventLogService: EventLogService
     private let notificationScheduler: NotificationScheduler
-    
-    // MARK: - Types
-    
-    enum ViewMode: String, CaseIterable {
-        case board = "Board"
-        case list = "List"
-        
-        var icon: String {
-            switch self {
-            case .board: return "square.grid.2x2"
-            case .list: return "list.bullet"
-            }
-        }
-    }
-    
-    enum SortOption: String, CaseIterable {
-        case window = "Time Window"
-        case priority = "Priority"
-        case created = "Created"
-        case title = "Title"
-    }
     
     // MARK: - Initialization
     
@@ -76,22 +53,11 @@ final class TasksViewModel {
         
         isLoading = true
         
-        var descriptor = FetchDescriptor<RhythmTask>()
-        
-        // Apply sorting
-        switch sortOption {
-        case .window:
-            descriptor.sortBy = [SortDescriptor(\.windowStart, order: .forward)]
-        case .priority:
-            descriptor.sortBy = [SortDescriptor(\.priorityRaw)]
-        case .created:
-            descriptor.sortBy = [SortDescriptor(\.createdAt, order: .reverse)]
-        case .title:
-            descriptor.sortBy = [SortDescriptor(\.title)]
-        }
+        let descriptor = FetchDescriptor<RhythmTask>()
         
         do {
-            tasks = try context.fetch(descriptor)
+            tasks = sortedByPrioritization(try context.fetch(descriptor))
+            normalizePrioritizationRanks()
         } catch {
             print("Failed to fetch tasks: \(error)")
             tasks = []
@@ -143,6 +109,7 @@ final class TasksViewModel {
             priority: priority,
             openingAction: openingAction
         )
+        task.prioritizationRank = nextTopPrioritizationRank()
         task.estimatedMinutes = estimatedMinutes
         task.deadline = deadline
         task.notes = notes
@@ -152,8 +119,9 @@ final class TasksViewModel {
         
         try? context.save()
         
-        // Immediately add to tasks array for instant UI update
+        // Immediately add to tasks array for instant UI update.
         tasks.insert(task, at: 0)
+        normalizePrioritizationRanks()
         
         showingAddSheet = false
     }
@@ -246,6 +214,27 @@ final class TasksViewModel {
         }
     }
     
+    func moveTasks(from source: IndexSet, to destination: Int) {
+        let sourceIndexes = source.sorted()
+        guard !sourceIndexes.isEmpty else { return }
+        
+        let movingTasks = sourceIndexes.compactMap { index in
+            tasks.indices.contains(index) ? tasks[index] : nil
+        }
+        guard movingTasks.count == sourceIndexes.count else { return }
+        
+        var reorderedTasks = tasks.enumerated()
+            .filter { !source.contains($0.offset) }
+            .map(\.element)
+        
+        let removedBeforeDestination = sourceIndexes.filter { $0 < destination }.count
+        let insertionIndex = max(0, min(destination - removedBeforeDestination, reorderedTasks.count))
+        
+        reorderedTasks.insert(contentsOf: movingTasks, at: insertionIndex)
+        tasks = reorderedTasks
+        normalizePrioritizationRanks()
+    }
+    
     // MARK: - Bulk Actions
     
     func completeAllInProgress() {
@@ -293,15 +282,60 @@ final class TasksViewModel {
         selectedTask = nil
     }
     
-    // MARK: - View Mode & Sort
+    // MARK: - Prioritization
     
-    func toggleViewMode() {
-        viewMode = viewMode == .board ? .list : .board
+    private func sortedByPrioritization(_ tasks: [RhythmTask]) -> [RhythmTask] {
+        tasks.sorted { lhs, rhs in
+            switch (lhs.prioritizationRank, rhs.prioritizationRank) {
+            case let (lhsRank?, rhsRank?) where lhsRank != rhsRank:
+                return lhsRank < rhsRank
+            case (_?, nil):
+                return true
+            case (nil, _?):
+                return false
+            default:
+                return fallbackPrioritizationSort(lhs, rhs)
+            }
+        }
     }
     
-    func setSortOption(_ option: SortOption) async {
-        sortOption = option
-        await loadTasks()
+    private func fallbackPrioritizationSort(_ lhs: RhythmTask, _ rhs: RhythmTask) -> Bool {
+        if lhs.priority.sortOrder != rhs.priority.sortOrder {
+            return lhs.priority.sortOrder < rhs.priority.sortOrder
+        }
+        
+        switch (lhs.windowStart, rhs.windowStart) {
+        case let (lhsStart?, rhsStart?) where lhsStart != rhsStart:
+            return lhsStart < rhsStart
+        case (_?, nil):
+            return true
+        case (nil, _?):
+            return false
+        default:
+            return lhs.createdAt < rhs.createdAt
+        }
+    }
+    
+    private func nextTopPrioritizationRank() -> Double {
+        let topRank = tasks.compactMap(\.prioritizationRank).min() ?? 0
+        return topRank - 1
+    }
+    
+    private func normalizePrioritizationRanks() {
+        var didChange = false
+        
+        for (index, task) in tasks.enumerated() {
+            let rank = Double(index)
+            if task.prioritizationRank != rank {
+                task.prioritizationRank = rank
+                task.markDirty()
+                didChange = true
+            }
+        }
+        
+        if didChange {
+            try? modelContext?.save()
+        }
     }
 }
 
@@ -342,4 +376,3 @@ extension TasksViewModel {
         return Array(tags).sorted()
     }
 }
-

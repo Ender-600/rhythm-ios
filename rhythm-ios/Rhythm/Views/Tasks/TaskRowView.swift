@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TaskRowView: View {
     let task: RhythmTask
+    var showsDragHandle = false
     var onTap: (() -> Void)?
     var onStart: (() -> Void)?
     var onComplete: (() -> Void)?
@@ -19,6 +20,10 @@ struct TaskRowView: View {
     var body: some View {
         Button(action: { onTap?() }) {
             HStack(alignment: .top, spacing: 12) {
+                if showsDragHandle {
+                    dragHandle
+                }
+                
                 // Status indicator
                 statusIndicator
                 
@@ -94,6 +99,15 @@ struct TaskRowView: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
+    }
+    
+    private var dragHandle: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.caption)
+            .foregroundColor(.rhythmTextMuted)
+            .frame(width: 16, height: 24)
+            .padding(.top, 1)
+            .accessibilityLabel("Reorder task")
     }
     
     private var statusIndicator: some View {
@@ -228,4 +242,3 @@ struct CompactTaskRow: View {
     }
     .padding()
 }
-
