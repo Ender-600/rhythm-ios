@@ -17,6 +17,7 @@ struct MainTabView: View {
     let eventLogService: EventLogService
     let notificationScheduler: NotificationScheduler
     let authService: AuthService
+    let calendarService: CalendarService
     let syncService: SyncService
     
     // State
@@ -90,7 +91,11 @@ struct MainTabView: View {
                 .tag(Tab.memory)
             
             // Settings tab
-            SettingsView(authService: authService, syncService: syncService)
+            SettingsView(
+                authService: authService,
+                syncService: syncService,
+                calendarService: calendarService
+            )
                 .tabItem {
                     Label(Tab.settings.rawValue, systemImage: Tab.settings.icon)
                 }
@@ -112,7 +117,8 @@ struct MainTabView: View {
             let vm = QuickAddViewModel(
                 speechService: speechService,
                 eventLogService: eventLogService,
-                notificationScheduler: notificationScheduler
+                notificationScheduler: notificationScheduler,
+                calendarService: calendarService
             )
             vm.configure(with: modelContext)
             quickAddViewModel = vm
@@ -122,7 +128,8 @@ struct MainTabView: View {
         if planViewModel == nil {
             let vm = PlanViewModel(
                 notificationScheduler: notificationScheduler,
-                eventLogService: eventLogService
+                eventLogService: eventLogService,
+                calendarService: calendarService
             )
             vm.configure(with: modelContext)
             planViewModel = vm
@@ -184,6 +191,7 @@ struct MainTabView: View {
         eventLogService: EventLogService(),
         notificationScheduler: NotificationScheduler(),
         authService: auth,
+        calendarService: CalendarService(),
         syncService: SyncService(authService: auth)
     )
 }

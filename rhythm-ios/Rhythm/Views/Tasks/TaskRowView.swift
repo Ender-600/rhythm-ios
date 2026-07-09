@@ -9,19 +9,24 @@ import SwiftUI
 
 struct TaskRowView: View {
     let task: RhythmTask
+    var showsDragHandle = false
     var onTap: (() -> Void)?
     var onStart: (() -> Void)?
     var onComplete: (() -> Void)?
     var onSnooze: (() -> Void)?
-    
+
     @Environment(\.colorScheme) private var colorScheme
-    
+
     var body: some View {
         Button(action: { onTap?() }) {
             HStack(alignment: .top, spacing: 12) {
+                if showsDragHandle {
+                    dragHandle
+                }
+
                 // Status indicator
                 statusIndicator
-                
+
                 // Content
                 VStack(alignment: .leading, spacing: 4) {
                     // Title
@@ -31,14 +36,14 @@ struct TaskRowView: View {
                         .foregroundColor(.rhythmTextPrimary)
                         .strikethrough(task.status == .done)
                         .lineLimit(2)
-                    
+
                     // Window time
                     if let description = task.windowDescription {
                         Text(description)
                             .font(.caption)
                             .foregroundColor(.rhythmTextSecondary)
                     }
-                    
+
                     // Tags
                     if let tags = task.tags, !tags.isEmpty {
                         HStack(spacing: 4) {
@@ -49,7 +54,7 @@ struct TaskRowView: View {
                             }
                         }
                     }
-                    
+
                     // Meta info
                     HStack(spacing: 8) {
                         // Priority
@@ -60,7 +65,7 @@ struct TaskRowView: View {
                                 .font(.caption2)
                         }
                         .foregroundColor(task.priority.color)
-                        
+
                         // Snooze count
                         if task.snoozeCount > 0 {
                             HStack(spacing: 2) {
@@ -71,7 +76,7 @@ struct TaskRowView: View {
                             }
                             .foregroundColor(.rhythmTextMuted)
                         }
-                        
+
                         // Overdue indicator
                         if task.isOverdue {
                             Text("Overdue")
@@ -80,9 +85,9 @@ struct TaskRowView: View {
                         }
                     }
                 }
-                
+
                 Spacer()
-                
+
                 // Quick actions
                 if task.status != .done {
                     quickActions
@@ -95,7 +100,16 @@ struct TaskRowView: View {
         }
         .buttonStyle(.plain)
     }
-    
+
+    private var dragHandle: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.caption)
+            .foregroundColor(.rhythmTextMuted)
+            .frame(width: 16, height: 24)
+            .padding(.top, 1)
+            .accessibilityLabel("Reorder task")
+    }
+
     private var statusIndicator: some View {
         Button(action: {
             if task.status == .done {
@@ -109,7 +123,7 @@ struct TaskRowView: View {
                 .foregroundColor(statusColor)
         }
     }
-    
+
     private var statusColor: Color {
         switch task.status {
         case .notStarted:
@@ -120,7 +134,7 @@ struct TaskRowView: View {
             return .rhythmSuccess
         }
     }
-    
+
     private var quickActions: some View {
         HStack(spacing: 8) {
             if task.status == .notStarted {
@@ -132,7 +146,7 @@ struct TaskRowView: View {
                     onComplete?()
                 }
             }
-            
+
             GentleIconButton(icon: "clock", size: 32, style: .subtle) {
                 onSnooze?()
             }
@@ -145,9 +159,9 @@ struct TaskRowView: View {
 struct CompactTaskRow: View {
     let task: RhythmTask
     var onTap: (() -> Void)?
-    
+
     @Environment(\.colorScheme) private var colorScheme
-    
+
     var body: some View {
         Button(action: { onTap?() }) {
             VStack(alignment: .leading, spacing: 6) {
@@ -157,22 +171,22 @@ struct CompactTaskRow: View {
                     .foregroundColor(.rhythmTextPrimary)
                     .strikethrough(task.status == .done)
                     .lineLimit(2)
-                
+
                 HStack(spacing: 6) {
                     // Priority dot
                     Circle()
                         .fill(task.priority.color)
                         .frame(width: 6, height: 6)
-                    
+
                     // Time
                     if let start = task.windowStart {
                         Text(start.shortTimeString)
                             .font(.caption2)
                             .foregroundColor(.rhythmTextSecondary)
                     }
-                    
+
                     Spacer()
-                    
+
                     // Snooze count
                     if task.snoozeCount > 0 {
                         HStack(spacing: 2) {
@@ -205,7 +219,7 @@ struct CompactTaskRow: View {
                 priority: .urgent
             )
         )
-        
+
         TaskRowView(
             task: {
                 let t = RhythmTask(title: "Review PRs", priority: .normal)
@@ -213,7 +227,7 @@ struct CompactTaskRow: View {
                 return t
             }()
         )
-        
+
         TaskRowView(
             task: {
                 let t = RhythmTask(title: "Clean desk", priority: .low)
@@ -221,11 +235,10 @@ struct CompactTaskRow: View {
                 return t
             }()
         )
-        
+
         CompactTaskRow(
             task: RhythmTask(title: "Quick task", priority: .normal)
         )
     }
     .padding()
 }
-

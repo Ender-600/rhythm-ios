@@ -412,8 +412,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JV28JWKPD5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Rhythm reads your Calendar to understand existing commitments and plan around them.";
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Rhythm adds your planned time windows to Calendar when you choose to sync them.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rhythm uses your microphone to capture voice input for creating tasks and planning your day.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Rhythm uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -445,8 +448,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = JV28JWKPD5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "Rhythm reads your Calendar to understand existing commitments and plan around them.";
+				INFOPLIST_KEY_NSCalendarsWriteOnlyAccessUsageDescription = "Rhythm adds your planned time windows to Calendar when you choose to sync them.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Rhythm uses your microphone to capture voice input for creating tasks and planning your day.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Rhythm uses speech recognition to convert your voice into text for task creation.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

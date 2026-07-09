@@ -10,12 +10,13 @@ import SwiftUI
 
 struct MonthOverviewView: View {
     let months: [Date]
+    let focusedDate: Date
     let tasksForMonth: (Date) -> [Date: [RhythmTask]]
     var onDayTap: ((Date) -> Void)?
     var onTaskTap: ((RhythmTask) -> Void)?
     
     @Environment(\.colorScheme) private var colorScheme
-    @State private var scrolledToCurrentMonth = false
+    @State private var scrolledToFocusedMonth = false
     
     var body: some View {
         ScrollViewReader { proxy in
@@ -35,10 +36,13 @@ struct MonthOverviewView: View {
                 .padding(.vertical, 12)
             }
             .onAppear {
-                if !scrolledToCurrentMonth {
-                    scrollToCurrentMonth(proxy: proxy)
-                    scrolledToCurrentMonth = true
+                if !scrolledToFocusedMonth {
+                    scrollToFocusedMonth(proxy: proxy)
+                    scrolledToFocusedMonth = true
                 }
+            }
+            .onChange(of: focusedDate) {
+                scrollToFocusedMonth(proxy: proxy)
             }
         }
     }
@@ -49,13 +53,13 @@ struct MonthOverviewView: View {
         return formatter.string(from: date)
     }
     
-    private func scrollToCurrentMonth(proxy: ScrollViewProxy) {
-        let currentMonth = Calendar.current.startOfMonth(for: Date())
-        let currentMonthId = monthId(for: currentMonth)
+    private func scrollToFocusedMonth(proxy: ScrollViewProxy) {
+        let focusedMonth = Calendar.current.startOfMonth(for: focusedDate)
+        let focusedMonthId = monthId(for: focusedMonth)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             withAnimation(.none) {
-                proxy.scrollTo(currentMonthId, anchor: .top)
+                proxy.scrollTo(focusedMonthId, anchor: .top)
             }
         }
     }
@@ -416,8 +420,9 @@ struct DayTaskRow: View {
         return result
     }
     
-    return MonthOverviewView(
+    MonthOverviewView(
         months: months,
+        focusedDate: Date(),
         tasksForMonth: tasksForMonth
     )
 }

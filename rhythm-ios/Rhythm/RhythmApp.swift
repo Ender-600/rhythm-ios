@@ -39,6 +39,7 @@ struct RhythmApp: App {
     @State private var speechService = SpeechService()
     @State private var eventLogService = EventLogService()
     @State private var notificationScheduler = NotificationScheduler()
+    @State private var calendarService = CalendarService()
     
     // MARK: - App State
     
@@ -57,6 +58,7 @@ struct RhythmApp: App {
                 eventLogService: eventLogService,
                 notificationScheduler: notificationScheduler,
                 authService: authService,
+                calendarService: calendarService,
                 syncService: syncService
             )
             .modelContainer(sharedModelContainer)

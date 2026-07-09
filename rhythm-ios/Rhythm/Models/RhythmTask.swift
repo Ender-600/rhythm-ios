@@ -29,6 +29,7 @@ final class RhythmTask {
     
     var statusRaw: String // TaskStatus raw value
     var priorityRaw: String // TaskPriority raw value
+    var prioritizationRank: Double? // User-defined order; lower means higher priority
     
     // MARK: - Lifecycle Timestamps
     
@@ -58,6 +59,11 @@ final class RhythmTask {
     var serverId: String?
     var dirtyFlag: Bool
     var lastSyncedAt: Date?
+
+    // MARK: - Apple Calendar
+
+    var appleCalendarEventIdentifier: String?
+    var appleCalendarSyncedAt: Date?
     
     // MARK: - Relationships
     
@@ -100,12 +106,15 @@ final class RhythmTask {
         self.bufferMinutes = 15 // Default 15-minute buffer
         self.statusRaw = TaskStatus.notStarted.rawValue
         self.priorityRaw = priority.rawValue
+        self.prioritizationRank = nil
         self.snoozeCount = 0
         self.totalActiveSeconds = 0
         self.openingAction = openingAction
         self.serverId = nil
         self.dirtyFlag = true
         self.lastSyncedAt = nil
+        self.appleCalendarEventIdentifier = nil
+        self.appleCalendarSyncedAt = nil
         self.tags = []
         self.scheduleChanges = []
     }
@@ -281,4 +290,3 @@ extension RhythmTask {
         self.lastSyncedAt = Date()
     }
 }
-

@@ -2,10 +2,7 @@
 //  PlanView.swift
 //  Rhythm
 //
-//  Plan view with three modes:
-//  - Today: 24-hour vertical timeline
-//  - 3 Days: Horizontal scrolling columns
-//  - Month: Calendar grid overview
+//  Calendar that zooms from month, to week, to a minute-level day timeline.
 //
 
 import SwiftUI
@@ -15,8 +12,10 @@ struct PlanView: View {
     @Environment(\.colorScheme) private var colorScheme
     
     @State private var selectedTask: RhythmTask?
+    @State private var selectedPlanWindow: PlanTimeSelection?
     @State private var showingSnoozeSheet = false
     @State private var showingTaskDetail = false
+    @GestureState private var liveMagnification: CGFloat = 1
     
     var body: some View {
         NavigationStack {
@@ -25,10 +24,10 @@ struct PlanView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Header with greeting and period selector
+                    // Header and current calendar precision
                     VStack(alignment: .leading, spacing: 16) {
                         headerSection
-                        periodSelector
+                        zoomControl
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 16)
@@ -40,6 +39,11 @@ struct PlanView: View {
                             .frame(maxHeight: .infinity)
                     } else {
                         planContent
+                            .id(viewModel.zoomLevel)
+                            .scaleEffect(contentScale)
+                            .opacity(contentOpacity)
+                            .simultaneousGesture(zoomGesture)
+                            .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     }
                 }
             }
@@ -62,72 +66,100 @@ struct PlanView: View {
                     .presentationDetents([.medium])
                 }
             }
+            .sheet(item: $selectedPlanWindow) { selection in
+                PlanCreationSheet(selection: selection, viewModel: viewModel)
+                    .presentationDetents([.medium, .large])
+            }
         }
     }
     
     // MARK: - Header Section
     
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(Copy.greeting)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.rhythmTextPrimary)
-            
-            Text(viewModel.summaryText)
-                .font(.subheadline)
-                .foregroundColor(.rhythmTextSecondary)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(Copy.greeting)
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundColor(.rhythmTextPrimary)
+
+                Text(viewModel.summaryText)
+                    .font(.subheadline)
+                    .foregroundColor(.rhythmTextSecondary)
+            }
+
+            Spacer()
+
+            if !Calendar.current.isDateInToday(viewModel.focusedDate) {
+                Button("Today") {
+                    withAnimation(.snappy) {
+                        viewModel.resetToToday()
+                    }
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.rhythmCoral)
+            }
         }
     }
     
-    // MARK: - Period Selector
-    
-    private var periodSelector: some View {
-        HStack(spacing: 0) {
-            ForEach(PlanViewModel.PlanPeriod.allCases, id: \.self) { period in
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        viewModel.selectPeriod(period)
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: period.icon)
-                            .font(.caption)
-                        
-                        Text(period.rawValue)
-                            .font(.subheadline)
-                            .fontWeight(viewModel.selectedPeriod == period ? .semibold : .regular)
-                    }
-                    .foregroundColor(
-                        viewModel.selectedPeriod == period
-                            ? .rhythmCoral
-                            : .rhythmTextSecondary
-                    )
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
-                    .background(
-                        viewModel.selectedPeriod == period
-                            ? Color.rhythmCoral.opacity(0.15)
-                            : Color.clear
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
+    // MARK: - Zoom Control
+
+    private var zoomControl: some View {
+        HStack(spacing: 12) {
+            zoomButton(systemName: "minus.magnifyingglass", enabled: viewModel.canZoomOut) {
+                changeZoom { viewModel.zoomOut() }
+            }
+
+            VStack(spacing: 2) {
+                Label(viewModel.zoomLevel.title, systemImage: viewModel.zoomLevel.icon)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.rhythmCoral)
+
+                Text(viewModel.focusedRangeTitle)
+                    .font(.caption)
+                    .foregroundStyle(Color.rhythmTextSecondary)
+                    .lineLimit(1)
+            }
+            .frame(maxWidth: .infinity)
+
+            zoomButton(systemName: "plus.magnifyingglass", enabled: viewModel.canZoomIn) {
+                changeZoom { viewModel.zoomIn() }
             }
         }
-        .padding(4)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .background(Color.rhythmCard(for: colorScheme))
         .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(alignment: .bottom) {
+            Text("Pinch to change detail")
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(Color.rhythmTextMuted)
+                .offset(y: 15)
+        }
+        .padding(.bottom, 5)
+    }
+
+    private func zoomButton(systemName: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .font(.body.weight(.semibold))
+                .frame(width: 36, height: 32)
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(enabled ? Color.rhythmCoral : Color.rhythmTextMuted.opacity(0.35))
+        .disabled(!enabled)
     }
     
     // MARK: - Plan Content
     
     @ViewBuilder
     private var planContent: some View {
-        switch viewModel.selectedPeriod {
-        case .today:
-            // 24-hour vertical timeline
+        switch viewModel.zoomLevel {
+        case .day:
             TodayTimelineView(
-                tasks: viewModel.todayTasks,
+                date: viewModel.focusedDate,
+                tasks: viewModel.focusedDayTasks,
                 onTaskTap: { task in
                     selectedTask = task
                     showingTaskDetail = true
@@ -138,18 +170,26 @@ struct PlanView: View {
                 },
                 onStart: { task in
                     viewModel.startTask(task)
+                },
+                onCreateSelection: { selection in
+                    selectedPlanWindow = selection
                 }
             )
             .refreshable {
                 await viewModel.refresh()
             }
             
-        case .nearFuture:
-            // 3-column horizontal scrolling view
-            ThreeDayView(
-                dateRange: viewModel.dateRangeForThreeDayView(),
+        case .week:
+            WeekAgendaView(
+                dates: viewModel.weekDates(containing: viewModel.focusedDate),
+                focusedDate: viewModel.focusedDate,
                 tasksProvider: { date in
                     viewModel.tasksForDate(date)
+                },
+                onDayTap: { date in
+                    changeZoom {
+                        viewModel.focus(on: date, zoomTo: .day)
+                    }
                 },
                 onTaskTap: { task in
                     selectedTask = task
@@ -164,22 +204,208 @@ struct PlanView: View {
                 }
             )
             
-        case .monthOverview:
-            // Month calendar grid
+        case .month:
             MonthOverviewView(
                 months: viewModel.monthsForMonthView(),
+                focusedDate: viewModel.focusedDate,
                 tasksForMonth: { month in
                     viewModel.tasksForMonth(month)
                 },
                 onDayTap: { date in
-                    // Could switch to today view for that date
-                },
-                onTaskTap: { task in
-                    selectedTask = task
-                    showingTaskDetail = true
+                    changeZoom {
+                        viewModel.focus(on: date, zoomTo: .week)
+                    }
                 }
             )
         }
+    }
+
+    private var zoomGesture: some Gesture {
+        MagnifyGesture(minimumScaleDelta: 0.01)
+            .updating($liveMagnification) { value, state, _ in
+                state = value.magnification
+            }
+            .onEnded { value in
+                if value.magnification > 1.16, viewModel.canZoomIn {
+                    changeZoom { viewModel.zoomIn() }
+                } else if value.magnification < 0.86, viewModel.canZoomOut {
+                    changeZoom { viewModel.zoomOut() }
+                }
+            }
+    }
+
+    private var contentScale: CGFloat {
+        let delta = (liveMagnification - 1) * 0.08
+        return min(max(1 + delta, 0.96), 1.04)
+    }
+
+    private var contentOpacity: Double {
+        min(max(1 - abs(liveMagnification - 1) * 0.12, 0.88), 1)
+    }
+
+    private func changeZoom(_ update: () -> Void) {
+        withAnimation(.snappy(duration: 0.28)) {
+            update()
+        }
+    }
+}
+
+// MARK: - Plan Creation Sheet
+
+private struct PlanCreationSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
+
+    let selection: PlanTimeSelection
+    let viewModel: PlanViewModel
+
+    @State private var title = ""
+    @State private var start: Date
+    @State private var durationMinutes: Int
+    @State private var priority: TaskPriority = .normal
+    @State private var openingAction = ""
+    @State private var notes = ""
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+
+    init(selection: PlanTimeSelection, viewModel: PlanViewModel) {
+        self.selection = selection
+        self.viewModel = viewModel
+        _start = State(initialValue: selection.start)
+        _durationMinutes = State(initialValue: selection.durationMinutes)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                Color.rhythmBackground(for: colorScheme)
+                    .ignoresSafeArea()
+
+                Form {
+                    Section {
+                        TextField("Title", text: $title)
+                            .textInputAutocapitalization(.sentences)
+
+                        DatePicker(
+                            "Starts",
+                            selection: $start,
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+
+                        Stepper(value: $durationMinutes, in: 15...480, step: 15) {
+                            HStack {
+                                Text("Duration")
+                                Spacer()
+                                Text(formatDuration(durationMinutes))
+                                    .foregroundColor(.rhythmTextSecondary)
+                            }
+                        }
+                    }
+
+                    Section {
+                        Picker("Priority", selection: $priority) {
+                            ForEach(TaskPriority.allCases, id: \.self) { priority in
+                                Text(priority.displayName).tag(priority)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    Section {
+                        TextField("First step", text: $openingAction, axis: .vertical)
+                            .lineLimit(1...2)
+
+                        TextField("Notes", text: $notes, axis: .vertical)
+                            .lineLimit(2...5)
+                    }
+
+                    if let errorMessage {
+                        Section {
+                            Text(errorMessage)
+                                .font(.caption)
+                                .foregroundStyle(Color.rhythmError)
+                        }
+                    }
+                }
+                .scrollContentBackground(.hidden)
+            }
+            .navigationTitle("New Plan")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .disabled(isSaving)
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        Task {
+                            await save()
+                        }
+                    } label: {
+                        if isSaving {
+                            ProgressView()
+                        } else {
+                            Text("Create")
+                        }
+                    }
+                    .disabled(!canSave)
+                }
+            }
+        }
+    }
+
+    private var canSave: Bool {
+        !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !isSaving
+    }
+
+    private var end: Date {
+        start.adding(minutes: durationMinutes)
+    }
+
+    private func save() async {
+        guard canSave else { return }
+
+        isSaving = true
+        errorMessage = nil
+
+        do {
+            try await viewModel.createPlan(
+                title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+                start: start,
+                end: end,
+                priority: priority,
+                openingAction: openingAction.trimmedOrNil,
+                notes: notes.trimmedOrNil
+            )
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+
+        isSaving = false
+    }
+
+    private func formatDuration(_ minutes: Int) -> String {
+        if minutes < 60 {
+            return "\(minutes)m"
+        }
+
+        let hours = minutes / 60
+        let remaining = minutes % 60
+        if remaining == 0 {
+            return "\(hours)h"
+        }
+        return "\(hours)h \(remaining)m"
+    }
+}
+
+private extension String {
+    var trimmedOrNil: String? {
+        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty ? nil : trimmed
     }
 }
 
@@ -293,4 +519,3 @@ struct SnoozeSheet: View {
         )
     )
 }
-

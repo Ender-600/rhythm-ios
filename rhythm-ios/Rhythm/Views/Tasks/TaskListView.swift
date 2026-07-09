@@ -2,10 +2,11 @@
 //  TaskListView.swift
 //  Rhythm
 //
-//  Simple list view of all tasks
+//  Prioritized draggable list view of all tasks
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct TaskListView: View {
     let tasks: [RhythmTask]
@@ -14,16 +15,38 @@ struct TaskListView: View {
     var onTaskComplete: ((RhythmTask) -> Void)?
     var onTaskSnooze: ((RhythmTask) -> Void)?
     var onTaskDelete: ((RhythmTask) -> Void)?
-    
+    var onMove: ((IndexSet, Int) -> Void)?
+
+    @State private var draggedTaskID: UUID?
+
     var body: some View {
         LazyVStack(spacing: 10) {
             ForEach(tasks) { task in
                 TaskRowView(
                     task: task,
+                    showsDragHandle: true,
                     onTap: { onTaskTap?(task) },
                     onStart: { onTaskStart?(task) },
                     onComplete: { onTaskComplete?(task) },
                     onSnooze: { onTaskSnooze?(task) }
+                )
+                .opacity(draggedTaskID == task.id ? 0.55 : 1)
+                .contentShape(.dragPreview, RoundedRectangle(cornerRadius: 12))
+                .onDrag {
+                    draggedTaskID = task.id
+                    return NSItemProvider(object: task.id.uuidString as NSString)
+                } preview: {
+                    TaskRowView(task: task, showsDragHandle: true)
+                        .frame(width: 320)
+                }
+                .onDrop(
+                    of: [UTType.text],
+                    delegate: TaskReorderDropDelegate(
+                        targetTask: task,
+                        tasks: tasks,
+                        draggedTaskID: $draggedTaskID,
+                        onMove: onMove
+                    )
                 )
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button(role: .destructive) {
@@ -31,7 +54,7 @@ struct TaskListView: View {
                     } label: {
                         Label("Delete", systemImage: "trash")
                     }
-                    
+
                     if task.status != .done {
                         Button {
                             onTaskSnooze?(task)
@@ -63,6 +86,37 @@ struct TaskListView: View {
     }
 }
 
+private struct TaskReorderDropDelegate: DropDelegate {
+    let targetTask: RhythmTask
+    let tasks: [RhythmTask]
+    @Binding var draggedTaskID: UUID?
+    var onMove: ((IndexSet, Int) -> Void)?
+
+    func dropEntered(info: DropInfo) {
+        guard
+            let draggedTaskID,
+            draggedTaskID != targetTask.id,
+            let fromIndex = tasks.firstIndex(where: { $0.id == draggedTaskID }),
+            let toIndex = tasks.firstIndex(where: { $0.id == targetTask.id })
+        else {
+            return
+        }
+
+        withAnimation(.snappy) {
+            onMove?(IndexSet(integer: fromIndex), toIndex > fromIndex ? toIndex + 1 : toIndex)
+        }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggedTaskID = nil
+        return true
+    }
+}
+
 // MARK: - Grouped Task List
 
 struct GroupedTaskListView: View {
@@ -72,13 +126,13 @@ struct GroupedTaskListView: View {
     var onTaskStart: ((RhythmTask) -> Void)?
     var onTaskComplete: ((RhythmTask) -> Void)?
     var onTaskSnooze: ((RhythmTask) -> Void)?
-    
+
     enum GroupOption {
         case status
         case priority
         case date
     }
-    
+
     var body: some View {
         LazyVStack(alignment: .leading, spacing: 20) {
             ForEach(groupedTasks, id: \.0) { group, tasks in
@@ -89,7 +143,7 @@ struct GroupedTaskListView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.rhythmTextSecondary)
                         .padding(.horizontal, 4)
-                    
+
                     // Tasks in group
                     ForEach(tasks) { task in
                         TaskRowView(
@@ -104,7 +158,7 @@ struct GroupedTaskListView: View {
             }
         }
     }
-    
+
     private var groupedTasks: [(String, [RhythmTask])] {
         switch groupBy {
         case .status:
@@ -115,7 +169,7 @@ struct GroupedTaskListView: View {
             return groupByDate()
         }
     }
-    
+
     private func groupByStatus() -> [(String, [RhythmTask])] {
         let grouped = Dictionary(grouping: tasks) { $0.status }
         return [
@@ -124,7 +178,7 @@ struct GroupedTaskListView: View {
             (TaskStatus.done.displayName, grouped[.done] ?? [])
         ].filter { !$0.1.isEmpty }
     }
-    
+
     private func groupByPriority() -> [(String, [RhythmTask])] {
         let grouped = Dictionary(grouping: tasks) { $0.priority }
         return [
@@ -133,7 +187,7 @@ struct GroupedTaskListView: View {
             (TaskPriority.low.displayName, grouped[.low] ?? [])
         ].filter { !$0.1.isEmpty }
     }
-    
+
     private func groupByDate() -> [(String, [RhythmTask])] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: tasks) { task -> String in
@@ -141,12 +195,12 @@ struct GroupedTaskListView: View {
             if calendar.isDateInToday(start) { return "Today" }
             if calendar.isDateInTomorrow(start) { return "Tomorrow" }
             if start < Date() { return "Overdue" }
-            
+
             let formatter = DateFormatter()
             formatter.dateFormat = "EEEE, MMM d"
             return formatter.string(from: start)
         }
-        
+
         // Sort by date
         let sortOrder = ["Overdue", "Today", "Tomorrow", "No date"]
         return grouped.sorted { a, b in
@@ -175,4 +229,3 @@ struct GroupedTaskListView: View {
         .padding()
     }
 }
-
