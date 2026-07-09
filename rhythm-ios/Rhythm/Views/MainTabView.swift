@@ -96,13 +96,55 @@ struct MainTabView: View {
                 }
                 .tag(Tab.settings)
         }
-        .tint(.rhythmCoral)
+        .tint(.rhythmSignal)
+        .toolbar(.hidden, for: .tabBar)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            swissTabBar
+        }
         .onAppear {
             setupViewModels()
-            configureTabBarAppearance()
             
             // Log app open
             eventLogService.logAppOpened()
+        }
+    }
+
+    private var swissTabBar: some View {
+        VStack(spacing: 0) {
+            SwissRule(strong: true)
+
+            HStack(spacing: 0) {
+                ForEach(Tab.allCases, id: \.self) { tab in
+                    Button {
+                        selectedTab = tab
+                    } label: {
+                        VStack(spacing: 5) {
+                            Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
+                                .font(.system(size: 17, weight: .bold))
+                                .frame(height: 20)
+
+                            Text(tab.rawValue.uppercased())
+                                .font(.system(size: 9, weight: .black, design: .monospaced))
+                                .tracking(0.5)
+                        }
+                        .foregroundStyle(selectedTab == tab ? Color.rhythmSignal : Color.rhythmTextPrimary)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .overlay(alignment: .top) {
+                            if selectedTab == tab {
+                                Rectangle()
+                                    .fill(Color.rhythmSignal)
+                                    .frame(height: 3)
+                            }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(tab.rawValue)
+                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
+                }
+            }
+            .frame(height: 62)
+            .background(Color.rhythmBackground(for: colorScheme))
         }
     }
     
@@ -143,23 +185,6 @@ struct MainTabView: View {
         // Configure services that need model context
         eventLogService.configure(with: modelContext)
         syncService.configure(with: modelContext)
-    }
-    
-    private func configureTabBarAppearance() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        
-        // Customize colors
-        let normalColor = UIColor(Color.rhythmTextSecondary)
-        let selectedColor = UIColor(Color.rhythmCoral)
-        
-        appearance.stackedLayoutAppearance.normal.iconColor = normalColor
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: normalColor]
-        appearance.stackedLayoutAppearance.selected.iconColor = selectedColor
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selectedColor]
-        
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     // MARK: - Public Methods for Deep Linking

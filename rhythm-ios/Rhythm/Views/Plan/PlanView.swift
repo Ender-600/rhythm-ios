@@ -25,11 +25,11 @@ struct PlanView: View {
                 
                 VStack(spacing: 0) {
                     // Header and current calendar precision
-                    VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 14) {
                         headerSection
                         zoomControl
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, QuietSwiss.screenPadding)
                     .padding(.top, 16)
                     .padding(.bottom, 12)
                     
@@ -76,16 +76,15 @@ struct PlanView: View {
     // MARK: - Header Section
     
     private var headerSection: some View {
-        HStack(alignment: .top) {
+        HStack(alignment: .bottom) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(Copy.greeting)
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.rhythmTextPrimary)
+                Text(Copy.greeting.uppercased())
+                    .swissSectionLabel(color: .rhythmSignal)
 
                 Text(viewModel.summaryText)
-                    .font(.subheadline)
-                    .foregroundColor(.rhythmTextSecondary)
+                    .font(.system(size: 29, weight: .bold))
+                    .tracking(-0.8)
+                    .foregroundColor(.rhythmTextPrimary)
             }
 
             Spacer()
@@ -97,8 +96,12 @@ struct PlanView: View {
                     }
                 }
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(Color.rhythmCoral)
+                .foregroundStyle(Color.rhythmSignal)
             }
+        }
+        .padding(.bottom, 10)
+        .overlay(alignment: .bottom) {
+            SwissRule(strong: true)
         }
     }
     
@@ -112,11 +115,13 @@ struct PlanView: View {
 
             VStack(spacing: 2) {
                 Label(viewModel.zoomLevel.title, systemImage: viewModel.zoomLevel.icon)
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.rhythmCoral)
+                    .font(.caption.weight(.black))
+                    .textCase(.uppercase)
+                    .tracking(1)
+                    .foregroundStyle(Color.rhythmSignal)
 
                 Text(viewModel.focusedRangeTitle)
-                    .font(.caption)
+                    .font(.caption.monospaced())
                     .foregroundStyle(Color.rhythmTextSecondary)
                     .lineLimit(1)
             }
@@ -127,16 +132,8 @@ struct PlanView: View {
             }
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 8)
-        .background(Color.rhythmCard(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: 14))
-        .overlay(alignment: .bottom) {
-            Text("Pinch to change detail")
-                .font(.system(size: 9, weight: .medium))
-                .foregroundStyle(Color.rhythmTextMuted)
-                .offset(y: 15)
-        }
-        .padding(.bottom, 5)
+        .padding(.vertical, 9)
+        .swissSurface()
     }
 
     private func zoomButton(systemName: String, enabled: Bool, action: @escaping () -> Void) -> some View {
@@ -147,7 +144,7 @@ struct PlanView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .foregroundStyle(enabled ? Color.rhythmCoral : Color.rhythmTextMuted.opacity(0.35))
+        .foregroundStyle(enabled ? Color.rhythmTextPrimary : Color.rhythmTextMuted.opacity(0.35))
         .disabled(!enabled)
     }
     
@@ -424,8 +421,8 @@ struct SnoozeSheet: View {
                 // Header
                 VStack(spacing: 8) {
                     Text(Copy.Snooze.title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 26, weight: .bold))
+                        .tracking(-0.5)
                     
                     Text(Copy.Snooze.subtitle)
                         .font(.subheadline)
@@ -440,7 +437,7 @@ struct SnoozeSheet: View {
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color.rhythmChipBackground)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .swissSurface()
                     .padding(.horizontal)
                 
                 // Snooze options

@@ -23,8 +23,7 @@ struct TimeWindowCard: View {
                 HStack {
                     if let start = task.windowStart {
                         Text(start.shortTimeString)
-                            .font(.caption)
-                            .fontWeight(.medium)
+                            .font(.caption.monospaced().weight(.bold))
                             .foregroundColor(.rhythmTextSecondary)
                     }
                     
@@ -101,11 +100,16 @@ struct TimeWindowCard: View {
             .padding(isCompact ? 10 : 14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(borderColor, lineWidth: task.isInWindow ? 2 : 0)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(borderColor, lineWidth: task.isInWindow ? 2 : 1)
             )
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(task.priority.color)
+                    .frame(width: 4)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -125,7 +129,7 @@ struct TimeWindowCard: View {
         } else if task.isInWindow {
             return .rhythmAmber
         }
-        return .clear
+        return Color.rhythmRule(for: colorScheme)
     }
 }
 
@@ -154,7 +158,7 @@ struct CompactTimeBlock: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: height)
         .background(task.priority.color.opacity(0.8))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
     }
 }
 
@@ -199,4 +203,3 @@ struct CompactTimeBlock: View {
     }
     .padding()
 }
-

@@ -32,7 +32,7 @@ struct TaskRowView: View {
                     // Title
                     Text(task.title)
                         .font(.body)
-                        .fontWeight(.medium)
+                        .fontWeight(.semibold)
                         .foregroundColor(.rhythmTextPrimary)
                         .strikethrough(task.status == .done)
                         .lineLimit(2)
@@ -93,10 +93,19 @@ struct TaskRowView: View {
                     quickActions
                 }
             }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            .padding(.horizontal, 14)
             .background(Color.rhythmCard(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(statusColor)
+                    .frame(width: 4)
+            }
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(Color.rhythmRule(for: colorScheme))
+                    .frame(height: 1)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -201,7 +210,11 @@ struct CompactTaskRow: View {
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.rhythmCard(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(Color.rhythmRule(for: colorScheme), lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
     }

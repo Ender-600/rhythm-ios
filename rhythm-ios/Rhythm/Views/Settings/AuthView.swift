@@ -22,41 +22,42 @@ struct AuthView: View {
     
     var body: some View {
         ZStack {
-            // background gradient
-            LinearGradient(
-                colors: [currentTheme.primary.opacity(0.1), currentTheme.background],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            currentTheme.background.ignoresSafeArea()
             
-            VStack(spacing: 32) {
+            VStack(spacing: 28) {
                 Spacer()
                 
-                // Logo and title
-                VStack(spacing: 12) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 60))
-                        .foregroundStyle(currentTheme.primary)
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(alignment: .top) {
+                        Text("R")
+                            .font(.title.monospaced().weight(.black))
+                            .foregroundStyle(Color.rhythmPaper)
+                            .frame(width: 64, height: 64)
+                            .background(Color.rhythmSignal)
+
+                        Spacer()
+
+                        Text(isSignUpMode ? "NEW ACCOUNT" : "SIGN IN")
+                            .swissSectionLabel(color: .rhythmSignal)
+                    }
                     
                     Text("Rhythm")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(.system(size: 52, weight: .bold))
+                        .tracking(-2)
                         .foregroundStyle(currentTheme.text)
                     
                     Text(isSignUpMode ? "Create Your Account" : "Welcome Back")
-                        .font(.title3)
+                        .font(.title3.weight(.medium))
                         .foregroundStyle(currentTheme.textSecondary)
+
+                    SwissRule(strong: true)
                 }
+                .padding(.horizontal, QuietSwiss.screenPadding)
                 
-                Spacer()
-                
-                // 输入表单
                 VStack(spacing: 16) {
-                    // email input
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Email")
-                            .font(.subheadline)
-                            .foregroundStyle(currentTheme.textSecondary)
+                        Text("EMAIL")
+                            .swissSectionLabel()
                         
                         TextField("your@email.com", text: $email)
                             .textFieldStyle(RoundedTextFieldStyle(theme: currentTheme))
@@ -65,11 +66,9 @@ struct AuthView: View {
                             .keyboardType(.emailAddress)
                     }
                     
-                    // password input
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Password")
-                            .font(.subheadline)
-                            .foregroundStyle(currentTheme.textSecondary)
+                        Text("PASSWORD")
+                            .swissSectionLabel()
                         
                         SecureField("At least 6 characters", text: $password)
                             .textFieldStyle(RoundedTextFieldStyle(theme: currentTheme))
@@ -100,9 +99,13 @@ struct AuthView: View {
                         }
                         .frame(maxWidth: .infinity)
                         .frame(height: 52)
-                        .background(currentTheme.primary)
-                        .foregroundStyle(.white)
-                        .cornerRadius(16)
+                        .background(Color.rhythmInk)
+                        .foregroundStyle(Color.rhythmPaper)
+                        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+                        .overlay {
+                            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                                .stroke(Color.rhythmInk, lineWidth: 1)
+                        }
                     }
                     .disabled(authService.isLoading || !isFormValid)
                     .opacity(isFormValid ? 1 : 0.5)
@@ -124,12 +127,11 @@ struct AuthView: View {
                     }
                     .padding(.top, 8)
                 }
-                .padding(.horizontal, 32)
+                .padding(20)
+                .swissSurface()
+                .padding(.horizontal, QuietSwiss.screenPadding)
                 
                 Spacer()
-                
-                // Apple login (future feature)
-                // Button("使用 Apple 登录") { }
             }
             .padding(.vertical, 32)
         }
@@ -165,9 +167,9 @@ struct RoundedTextFieldStyle: TextFieldStyle {
             .padding(.horizontal, 16)
             .padding(.vertical, 14)
             .background(theme.cardBackground)
-            .cornerRadius(12)
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                     .stroke(theme.border, lineWidth: 1)
             )
     }

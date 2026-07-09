@@ -2,73 +2,90 @@
 //  Color+Theme.swift
 //  Rhythm
 //
-//  Warm, gentle design system - never harsh or commanding
+//  Quiet Swiss design system: precise, calm, and never commanding.
 //
 
 import SwiftUI
+import UIKit
 
 extension Color {
-    // MARK: - Primary Palette (Warm & Inviting)
+    // MARK: - Quiet Swiss Core Palette
+
+    /// Near-black ink for typography, rules, and primary controls.
+    static let rhythmInk = Color(red: 0.065, green: 0.063, blue: 0.055)
+
+    /// Warm paper instead of digital white.
+    static let rhythmPaper = Color(red: 0.972, green: 0.965, blue: 0.925)
+
+    /// Vermilion signal color. Used sparingly for the current action.
+    static let rhythmSignal = Color(red: 0.83, green: 0.12, blue: 0.065)
+
+    /// Functional green for completion and low-pressure confirmation.
+    static let rhythmGreen = Color(red: 0.18, green: 0.39, blue: 0.27)
+
+    /// Ochre for caution and time-related secondary information.
+    static let rhythmOchre = Color(red: 0.67, green: 0.46, blue: 0.10)
     
-    /// Soft coral - primary accent, warmth without urgency
-    static let rhythmCoral = Color(red: 0.95, green: 0.55, blue: 0.47)
+    // Legacy semantic names retained so business-facing views do not need to
+    // know that the visual system changed.
+    static let rhythmCoral = rhythmSignal
     
-    /// Warm amber - secondary accent, gentle energy
-    static let rhythmAmber = Color(red: 0.96, green: 0.76, blue: 0.42)
+    static let rhythmAmber = rhythmOchre
     
-    /// Soft sage - calm, could-do energy
-    static let rhythmSage = Color(red: 0.67, green: 0.78, blue: 0.68)
+    static let rhythmSage = rhythmGreen
     
-    /// Deep plum - for contrast and depth
-    static let rhythmPlum = Color(red: 0.35, green: 0.25, blue: 0.38)
+    static let rhythmPlum = rhythmInk
     
     // MARK: - Background Colors
     
-    /// Warm off-white for light mode
-    static let rhythmCream = Color(red: 0.99, green: 0.97, blue: 0.94)
+    static let rhythmCream = rhythmPaper
     
-    /// Soft charcoal for dark mode
-    static let rhythmCharcoal = Color(red: 0.15, green: 0.14, blue: 0.16)
+    static let rhythmCharcoal = Color(red: 0.075, green: 0.073, blue: 0.067)
     
-    /// Card background
-    static let rhythmCardLight = Color(red: 1.0, green: 0.99, blue: 0.97)
-    static let rhythmCardDark = Color(red: 0.20, green: 0.19, blue: 0.21)
+    static let rhythmCardLight = Color(red: 0.99, green: 0.985, blue: 0.95)
+    static let rhythmCardDark = Color(red: 0.115, green: 0.112, blue: 0.102)
     
     // MARK: - Text Colors
     
-    /// Primary text - warm, not pure black
-    static let rhythmTextPrimary = Color(red: 0.20, green: 0.18, blue: 0.22)
+    static let rhythmTextPrimary = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 0.95, alpha: 1)
+            : UIColor(red: 0.065, green: 0.063, blue: 0.055, alpha: 1)
+    })
     
-    /// Secondary text - softer
-    static let rhythmTextSecondary = Color(red: 0.45, green: 0.42, blue: 0.48)
+    static let rhythmTextSecondary = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 0.70, alpha: 1)
+            : UIColor(red: 0.37, green: 0.365, blue: 0.34, alpha: 1)
+    })
     
-    /// Muted text - hints and placeholders
-    static let rhythmTextMuted = Color(red: 0.65, green: 0.62, blue: 0.68)
+    static let rhythmTextMuted = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? UIColor(white: 0.50, alpha: 1)
+            : UIColor(red: 0.58, green: 0.57, blue: 0.53, alpha: 1)
+    })
     
     // MARK: - Semantic Colors
     
-    /// Success - gentle green
-    static let rhythmSuccess = Color(red: 0.52, green: 0.75, blue: 0.56)
+    static let rhythmSuccess = rhythmGreen
     
-    /// Warning - soft amber (not alarming)
-    static let rhythmWarning = Color(red: 0.94, green: 0.72, blue: 0.38)
+    static let rhythmWarning = rhythmOchre
     
-    /// Error - muted red (not aggressive)
-    static let rhythmError = Color(red: 0.85, green: 0.45, blue: 0.45)
+    static let rhythmError = Color(red: 0.70, green: 0.10, blue: 0.075)
     
     // MARK: - Voice Button
     
-    /// Recording state - pulsing warmth
-    static let rhythmRecording = Color(red: 0.92, green: 0.42, blue: 0.38)
+    static let rhythmRecording = rhythmSignal
     
-    /// Idle state - inviting
-    static let rhythmVoiceIdle = Color(red: 0.95, green: 0.55, blue: 0.47)
+    static let rhythmVoiceIdle = rhythmSignal
     
     // MARK: - Chip Colors
     
-    /// Signal chip background
-    static let rhythmChipBackground = Color(red: 0.96, green: 0.94, blue: 0.91)
-    static let rhythmChipBackgroundDark = Color(red: 0.25, green: 0.24, blue: 0.26)
+    static let rhythmChipBackground = Color(red: 0.91, green: 0.90, blue: 0.85)
+    static let rhythmChipBackgroundDark = Color(red: 0.16, green: 0.155, blue: 0.145)
+
+    static let rhythmRuleLight = Color.black.opacity(0.18)
+    static let rhythmRuleDark = Color.white.opacity(0.22)
 }
 
 // MARK: - Adaptive Colors
@@ -88,28 +105,32 @@ extension Color {
     static func rhythmChip(for scheme: ColorScheme) -> Color {
         scheme == .dark ? .rhythmChipBackgroundDark : .rhythmChipBackground
     }
+
+    static func rhythmRule(for scheme: ColorScheme) -> Color {
+        scheme == .dark ? .rhythmRuleDark : .rhythmRuleLight
+    }
 }
 
 // MARK: - Gradient Presets
 
 extension LinearGradient {
-    /// Warm sunrise gradient for headers
+    /// Legacy presets intentionally remain nearly flat in the Swiss system.
     static let rhythmSunrise = LinearGradient(
-        colors: [.rhythmCoral.opacity(0.8), .rhythmAmber.opacity(0.6)],
+        colors: [.rhythmSignal, .rhythmSignal],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     /// Calm evening gradient
     static let rhythmEvening = LinearGradient(
-        colors: [.rhythmPlum.opacity(0.7), .rhythmCoral.opacity(0.5)],
+        colors: [.rhythmInk, .rhythmInk],
         startPoint: .top,
         endPoint: .bottom
     )
     
     /// Voice button gradient
     static let rhythmVoice = LinearGradient(
-        colors: [.rhythmCoral, .rhythmAmber.opacity(0.8)],
+        colors: [.rhythmSignal, .rhythmSignal],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -148,7 +169,7 @@ extension Color {
             text: .rhythmTextPrimary,
             textSecondary: .rhythmTextSecondary,
             textMuted: .rhythmTextMuted,
-            border: Color(white: 0.9),
+            border: .rhythmRuleLight,
             success: .rhythmSuccess,
             warning: .rhythmWarning,
             error: .rhythmError
@@ -163,7 +184,7 @@ extension Color {
             text: .white.opacity(0.95),
             textSecondary: Color(white: 0.7),
             textMuted: Color(white: 0.5),
-            border: Color(white: 0.3),
+            border: .rhythmRuleDark,
             success: .rhythmSuccess,
             warning: .rhythmWarning,
             error: .rhythmError

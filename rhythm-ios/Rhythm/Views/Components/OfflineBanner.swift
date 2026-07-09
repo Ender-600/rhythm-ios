@@ -147,7 +147,11 @@ struct ErrorBanner: View {
         .padding(.vertical, 12)
         .background(Color.rhythmError.opacity(0.1))
         .foregroundColor(.rhythmError)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                .stroke(Color.rhythmError.opacity(0.45), lineWidth: 1)
+        }
     }
 }
 
@@ -176,4 +180,3 @@ struct ErrorBanner: View {
         .padding()
     }
 }
-

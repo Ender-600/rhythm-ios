@@ -115,65 +115,72 @@ struct QuickAddView: View {
     
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 8) {
+            Text("QUICK ADD / VOICE")
+                .swissSectionLabel(color: .rhythmSignal)
+
             switch viewModel.flowState {
             case .idle, .error:
                 Text(Copy.QuickAdd.prompt)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmTextPrimary)
                 
             case .recording:
                 Text(Copy.QuickAdd.voiceRecording)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmRecording)
                 
             case .processing:
                 HStack(spacing: 8) {
                     ProgressView()
                     Text(Copy.QuickAdd.voiceProcessing)
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 28, weight: .bold))
+                        .tracking(-0.6)
                         .foregroundColor(.rhythmTextPrimary)
                 }
                 
             case .reviewingSummary:
                 Text("I understood \(viewModel.totalIntentCount) things")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmTextPrimary)
                 
             case .reviewingCreate, .customizingTime, .saving:
                 if viewModel.hasMultipleIntents {
                     Text("Task \(viewModel.currentIntentProgress.current) of \(viewModel.currentIntentProgress.total)")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 28, weight: .bold))
+                        .tracking(-0.6)
                         .foregroundColor(.rhythmTextPrimary)
                 } else {
                     Text("Looking good!")
-                        .font(.title2)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 28, weight: .bold))
+                        .tracking(-0.6)
                         .foregroundColor(.rhythmTextPrimary)
                 }
                 
             case .reviewingUpdate:
                 Text(viewModel.updateAction?.displayName ?? "Update")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmTextPrimary)
                 
             case .selectingTask:
                 Text("Which task?")
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmTextPrimary)
                 
             case .completed:
                 Text(Copy.QuickAdd.successTitle)
-                    .font(.title2)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 28, weight: .bold))
+                    .tracking(-0.6)
                     .foregroundColor(.rhythmSuccess)
             }
+        }
+        .padding(.bottom, 12)
+        .overlay(alignment: .bottom) {
+            SwissRule(strong: true)
         }
     }
     
@@ -189,7 +196,7 @@ struct QuickAddView: View {
                     .textFieldStyle(.plain)
                     .padding()
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
                     .focused($isTyping)
                     .onSubmit {
                         if !typedInput.isEmpty {
@@ -217,9 +224,9 @@ struct QuickAddView: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
                     .overlay(
-                        RoundedRectangle(cornerRadius: 12)
+                        RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                             .stroke(Color.rhythmRecording.opacity(0.5), lineWidth: 2)
                     )
             }
@@ -231,7 +238,7 @@ struct QuickAddView: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
             
         case .reviewingSummary:
             // Show original transcript
@@ -241,7 +248,7 @@ struct QuickAddView: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
             
         case .reviewingCreate, .customizingTime, .saving:
             // Editable title
@@ -254,7 +261,7 @@ struct QuickAddView: View {
                     .font(.body)
                     .padding()
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
             }
             
         case .reviewingUpdate, .selectingTask:
@@ -266,7 +273,7 @@ struct QuickAddView: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
             }
             
         case .completed:
@@ -316,7 +323,7 @@ struct QuickAddView: View {
                     }
                     .padding()
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
                 }
             }
             
@@ -358,7 +365,7 @@ struct QuickAddView: View {
                 }
                 .padding()
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
             }
         }
     }
@@ -389,7 +396,7 @@ struct QuickAddView: View {
                     }
                     .padding()
                     .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
                 }
             }
         }
@@ -411,7 +418,7 @@ struct QuickAddView: View {
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(Color.rhythmCard(for: colorScheme))
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .swissSurface()
                 }
                 
                 if let action = viewModel.updateAction {
@@ -423,7 +430,7 @@ struct QuickAddView: View {
                     }
                     .padding()
                     .background(Color.rhythmAmber.opacity(0.15))
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .swissSurface()
                 }
             }
         }
@@ -544,14 +551,7 @@ struct QuickAddView: View {
         }
         .padding(.top, 16)
         .background(
-            LinearGradient(
-                colors: [
-                    Color.rhythmBackground(for: colorScheme).opacity(0),
-                    Color.rhythmBackground(for: colorScheme)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
+            Color.rhythmBackground(for: colorScheme)
             .ignoresSafeArea()
         )
     }
@@ -568,4 +568,3 @@ struct QuickAddView: View {
         )
     )
 }
-

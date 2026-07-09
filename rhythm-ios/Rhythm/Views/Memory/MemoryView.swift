@@ -17,90 +17,84 @@ struct MemoryView: View {
                 Color.rhythmBackground(for: colorScheme)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 24) {
-                    Spacer()
-                    
-                    // Icon
-                    ZStack {
-                        Circle()
-                            .fill(
-                                LinearGradient(
-                                    colors: [.rhythmCoral.opacity(0.2), .rhythmAmber.opacity(0.2)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .frame(width: 120, height: 120)
-                        
-                        Image(systemName: "brain.head.profile")
-                            .font(.system(size: 48))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [.rhythmCoral, .rhythmAmber],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    }
-                    
-                    // Text
-                    VStack(spacing: 12) {
-                        Text(Copy.Memory.title)
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.rhythmTextPrimary)
-                        
-                        Text(Copy.Memory.subtitle)
-                            .font(.subheadline)
-                            .foregroundColor(.rhythmTextSecondary)
-                    }
-                    
-                    // Teaser
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text(Copy.Memory.comingSoon)
-                            .font(.headline)
-                            .foregroundColor(.rhythmCoral)
-                        
-                        Text(Copy.Memory.teaser)
-                            .font(.body)
-                            .foregroundColor(.rhythmTextSecondary)
-                            .multilineTextAlignment(.center)
-                        
-                        // Future features teaser
-                        VStack(alignment: .leading, spacing: 12) {
-                            featureTeaser(icon: "chart.line.uptrend.xyaxis", text: "Your productivity patterns")
-                            featureTeaser(icon: "clock.arrow.circlepath", text: "Snooze habits & insights")
-                            featureTeaser(icon: "lightbulb", text: "Personalized suggestions")
-                            featureTeaser(icon: "calendar.badge.clock", text: "Best times for deep work")
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 5) {
+                                Text("MEMORY / PATTERNS")
+                                    .swissSectionLabel(color: .rhythmSignal)
+
+                                Text("A record of\nyour rhythm.")
+                                    .font(.system(size: 36, weight: .bold))
+                                    .tracking(-1.2)
+                                    .foregroundStyle(Color.rhythmTextPrimary)
+                            }
+
+                            Spacer()
+
+                            Text("M")
+                                .font(.title2.monospaced().weight(.black))
+                                .foregroundStyle(Color.rhythmPaper)
+                                .frame(width: 56, height: 56)
+                                .background(Color.rhythmInk)
                         }
-                        .padding(.top, 8)
+
+                        SwissRule(strong: true)
+
+                        Text(Copy.Memory.subtitle)
+                            .font(.body)
+                            .foregroundStyle(Color.rhythmTextSecondary)
+
+                        VStack(alignment: .leading, spacing: 10) {
+                            SwissSectionLabel(
+                                title: Copy.Memory.comingSoon,
+                                trailingText: "04 signals"
+                            )
+
+                            Text(Copy.Memory.teaser)
+                                .font(.body)
+                                .foregroundStyle(Color.rhythmTextSecondary)
+                                .padding(.bottom, 6)
+
+                            featureTeaser(index: "01", icon: "chart.line.uptrend.xyaxis", text: "Your productivity patterns")
+                            featureTeaser(index: "02", icon: "clock.arrow.circlepath", text: "Snooze habits & insights")
+                            featureTeaser(index: "03", icon: "lightbulb", text: "Personalized suggestions")
+                            featureTeaser(index: "04", icon: "calendar.badge.clock", text: "Best times for deep work")
+                        }
+                        .padding(18)
+                        .swissSurface()
                     }
-                    .padding(24)
-                    .background(Color.rhythmCard(for: colorScheme))
-                    .clipShape(RoundedRectangle(cornerRadius: 16))
-                    .padding(.horizontal, 20)
-                    
-                    Spacer()
-                    Spacer()
+                    .padding(.horizontal, QuietSwiss.screenPadding)
+                    .padding(.top, 18)
+                    .padding(.bottom, 110)
                 }
             }
-            .navigationTitle(Copy.Memory.title)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
     
-    private func featureTeaser(icon: String, text: String) -> some View {
-        HStack(spacing: 12) {
+    private func featureTeaser(index: String, icon: String, text: String) -> some View {
+        HStack(spacing: 10) {
+            Text(index)
+                .font(.caption2.monospaced())
+                .foregroundStyle(Color.rhythmTextMuted)
+                .frame(width: 22, alignment: .leading)
+
             Image(systemName: icon)
-                .font(.title3)
-                .foregroundColor(.rhythmCoral)
-                .frame(width: 28)
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(.rhythmSignal)
+                .frame(width: 24)
             
             Text(text)
-                .font(.subheadline)
+                .font(.subheadline.weight(.semibold))
                 .foregroundColor(.rhythmTextPrimary)
             
             Spacer()
+        }
+        .padding(.vertical, 11)
+        .overlay(alignment: .top) {
+            SwissRule()
         }
     }
 }
@@ -110,4 +104,3 @@ struct MemoryView: View {
 #Preview {
     MemoryView()
 }
-

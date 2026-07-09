@@ -21,7 +21,7 @@ struct MonthOverviewView: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView {
-                LazyVStack(spacing: 24) {
+                LazyVStack(spacing: 36) {
                     ForEach(months, id: \.self) { month in
                         MonthGridView(
                             month: month,
@@ -75,16 +75,16 @@ struct MonthGridView: View {
     
     @Environment(\.colorScheme) private var colorScheme
     
-    private let columns = Array(repeating: GridItem(.flexible(), spacing: 4), count: 7)
+    private let columns = Array(repeating: GridItem(.flexible(), spacing: 1), count: 7)
     private let weekdaySymbols = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 10) {
             // Month header
             HStack {
                 Text(month.monthYearString)
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                    .font(.system(size: 24, weight: .black))
+                    .tracking(-0.5)
                     .foregroundColor(.rhythmTextPrimary)
                 
                 Spacer()
@@ -93,28 +93,28 @@ struct MonthGridView: View {
                 let totalTasks = tasksByDate.values.reduce(0) { $0 + $1.count }
                 if totalTasks > 0 {
                     Text("\(totalTasks) tasks")
-                        .font(.caption)
+                        .font(.caption2.monospaced().weight(.bold))
+                        .textCase(.uppercase)
                         .foregroundColor(.rhythmTextSecondary)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(Color.rhythmChip(for: colorScheme))
-                        .clipShape(Capsule())
                 }
             }
+
+            SwissRule(strong: true)
             
             // Weekday headers
-            LazyVGrid(columns: columns, spacing: 4) {
+            LazyVGrid(columns: columns, spacing: 1) {
                 ForEach(weekdaySymbols, id: \.self) { symbol in
                     Text(symbol)
                         .font(.caption2)
-                        .fontWeight(.medium)
+                        .fontWeight(.black)
+                        .tracking(0.5)
                         .foregroundColor(.rhythmTextMuted)
                         .frame(maxWidth: .infinity)
                 }
             }
             
             // Calendar grid
-            LazyVGrid(columns: columns, spacing: 4) {
+            LazyVGrid(columns: columns, spacing: 1) {
                 // Leading empty cells for alignment
                 ForEach(0..<leadingEmptyCells, id: \.self) { _ in
                     Color.clear
@@ -138,9 +138,7 @@ struct MonthGridView: View {
                 }
             }
         }
-        .padding(16)
-        .background(Color.rhythmCard(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .padding(.vertical, 4)
     }
     
     private var daysInMonth: [Date] {
@@ -200,10 +198,10 @@ struct DayCellView: View {
             .frame(maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
             .background(cellBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(isToday ? Color.rhythmCoral : Color.clear, lineWidth: 2)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(isToday ? Color.rhythmCoral : Color.rhythmRule(for: colorScheme), lineWidth: isToday ? 2 : 1)
             )
         }
         .buttonStyle(.plain)
@@ -243,9 +241,9 @@ struct DayCellView: View {
             // Show dots for few tasks
             HStack(spacing: 2) {
                 ForEach(tasks.prefix(3)) { task in
-                    Circle()
+                    Rectangle()
                         .fill(task.priority.color)
-                        .frame(width: 4, height: 4)
+                        .frame(width: 5, height: 2)
                 }
             }
         } else {
@@ -270,7 +268,7 @@ struct DayTasksSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 0) {
                     ForEach(tasks) { task in
                         Button(action: {
                             onTaskTap?(task)
@@ -362,7 +360,9 @@ struct DayTaskRow: View {
         }
         .padding(12)
         .background(Color.rhythmCard(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .overlay(alignment: .bottom) {
+            SwissRule()
+        }
     }
 }
 

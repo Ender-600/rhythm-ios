@@ -107,8 +107,8 @@ struct BoardColumn<Content: View>: View {
                     .frame(width: 8, height: 8)
                 
                 Text(title)
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
+                    .font(.caption2.weight(.black))
+                    .tracking(1.2)
                     .foregroundColor(.rhythmTextSecondary)
                 
                 Text("\(count)")
@@ -118,7 +118,7 @@ struct BoardColumn<Content: View>: View {
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
                     .background(Color.rhythmChip(for: colorScheme))
-                    .clipShape(Capsule())
+                    .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             }
             
             // Tasks
@@ -137,7 +137,11 @@ struct BoardColumn<Content: View>: View {
         .frame(width: 280)
         .padding(12)
         .background(Color.rhythmCard(for: colorScheme).opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+        .overlay {
+            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                .stroke(Color.rhythmRule(for: colorScheme), lineWidth: 1)
+        }
     }
 }
 
@@ -217,7 +221,7 @@ struct BoardTaskCard: View {
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
                         .background(Color.rhythmCoral)
-                        .clipShape(Capsule())
+                        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                     }
                     
                     Button(action: { secondaryAction?() }) {
@@ -226,13 +230,17 @@ struct BoardTaskCard: View {
                             .foregroundColor(.rhythmTextSecondary)
                             .padding(6)
                             .background(Color.rhythmChip(for: colorScheme))
-                            .clipShape(Circle())
+                            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                     }
                 }
             }
             .padding(12)
             .background(Color.rhythmCard(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(Color.rhythmRule(for: colorScheme), lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -262,4 +270,3 @@ struct BoardTaskCard: View {
         ]
     )
 }
-

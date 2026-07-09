@@ -19,19 +19,19 @@ struct VoiceButton: View {
     @State private var isPressed = false
     @State private var pulseScale: CGFloat = 1.0
     
-    private let buttonSize: CGFloat = 80
+    private let buttonSize: CGFloat = 76
     
     var body: some View {
         ZStack {
-            // Pulsing background when recording
+            // Precise signal outline while recording.
             if isRecording {
-                Circle()
-                    .fill(Color.rhythmRecording.opacity(0.3))
-                    .frame(width: buttonSize * 1.5, height: buttonSize * 1.5)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(Color.rhythmRecording.opacity(0.45), lineWidth: 2)
+                    .frame(width: buttonSize + 18, height: buttonSize + 18)
                     .scaleEffect(pulseScale)
                     .onAppear {
                         withAnimation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true)) {
-                            pulseScale = 1.2
+                            pulseScale = 1.04
                         }
                     }
                     .onDisappear {
@@ -40,21 +40,19 @@ struct VoiceButton: View {
             }
             
             // Main button
-            Circle()
-                .fill(
-                    isRecording
-                        ? LinearGradient(colors: [.rhythmRecording, .rhythmCoral], startPoint: .top, endPoint: .bottom)
-                        : LinearGradient.rhythmVoice
-                )
+            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                .fill(isRecording ? Color.rhythmRecording : Color.rhythmVoiceIdle)
                 .frame(width: buttonSize, height: buttonSize)
-                .shadow(color: .rhythmCoral.opacity(0.3), radius: isPressed ? 5 : 10, y: isPressed ? 2 : 5)
                 .scaleEffect(isPressed ? 0.95 : 1.0)
+                .overlay {
+                    RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                        .stroke(Color.rhythmInk.opacity(0.45), lineWidth: 1)
+                }
             
             // Icon
             Image(systemName: isRecording ? "waveform" : "mic.fill")
                 .font(.system(size: 28, weight: .medium))
                 .foregroundColor(.white)
-                .symbolEffect(.variableColor.iterative, isActive: isRecording)
             
             // Duration indicator
             if isRecording {
@@ -154,10 +152,8 @@ struct MiniVoiceButton: View {
                 .font(.system(size: 16))
                 .foregroundColor(.white)
                 .frame(width: 36, height: 36)
-                .background(
-                    Circle()
-                        .fill(isRecording ? Color.rhythmRecording : Color.rhythmCoral)
-                )
+                .background(isRecording ? Color.rhythmRecording : Color.rhythmSignal)
+                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
         }
     }
 }
@@ -186,4 +182,3 @@ struct MiniVoiceButton: View {
     .padding()
     .background(Color.rhythmCream)
 }
-
