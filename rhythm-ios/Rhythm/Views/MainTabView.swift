@@ -10,7 +10,6 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.colorScheme) private var colorScheme
     
     // Services (injected from app)
     let speechService: SpeechService
@@ -101,16 +100,15 @@ struct MainTabView: View {
                 }
                 .tag(Tab.settings)
         }
-        .tint(.rhythmCoral)
+        .tint(.rhythmSignal)
         .onAppear {
             setupViewModels()
-            configureTabBarAppearance()
             
             // Log app open
             eventLogService.logAppOpened()
         }
     }
-    
+
     private func setupViewModels() {
         // Quick Add
         if quickAddViewModel == nil {
@@ -148,23 +146,6 @@ struct MainTabView: View {
         // Configure services that need model context
         eventLogService.configure(with: modelContext)
         syncService.configure(with: modelContext)
-    }
-    
-    private func configureTabBarAppearance() {
-        let appearance = UITabBarAppearance()
-        appearance.configureWithDefaultBackground()
-        
-        // Customize colors
-        let normalColor = UIColor(Color.rhythmTextSecondary)
-        let selectedColor = UIColor(Color.rhythmCoral)
-        
-        appearance.stackedLayoutAppearance.normal.iconColor = normalColor
-        appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: normalColor]
-        appearance.stackedLayoutAppearance.selected.iconColor = selectedColor
-        appearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: selectedColor]
-        
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
     
     // MARK: - Public Methods for Deep Linking

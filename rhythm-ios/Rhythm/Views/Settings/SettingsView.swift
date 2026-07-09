@@ -30,42 +30,45 @@ struct SettingsView: View {
                 Color.rhythmBackground(for: colorScheme)
                     .ignoresSafeArea()
                 
-                List {
-                    // Account
-                    Section("Account") {
-                        if authService.isAuthenticated {
-                            HStack {
-                                Label("Signed in", systemImage: "person.crop.circle.badge.checkmark")
-                                Spacer()
-                                Text(authService.userEmail ?? "Cloud account")
-                                    .font(.caption)
-                                    .foregroundColor(.rhythmTextSecondary)
-                            }
+                VStack(spacing: 0) {
+                    settingsHeader
 
-                            Button {
-                                Task {
-                                    try? await authService.signOut()
-                                    syncService.setCloudSyncEnabled(false)
+                    List {
+                        // Account
+                        Section("Account") {
+                            if authService.isAuthenticated {
+                                HStack {
+                                    Label("Signed in", systemImage: "person.crop.circle.badge.checkmark")
+                                    Spacer()
+                                    Text(authService.userEmail ?? "Cloud account")
+                                        .font(.caption)
+                                        .foregroundColor(.rhythmTextSecondary)
                                 }
-                            } label: {
-                                Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
-                                    .foregroundColor(.rhythmError)
-                            }
-                        } else {
-                            Text("Rhythm works locally on this device. Sign in only if you want cloud sync.")
-                                .font(.subheadline)
-                                .foregroundColor(.rhythmTextSecondary)
 
-                            NavigationLink {
-                                AuthView(authService: authService)
-                            } label: {
-                                Label("Sign In for Cloud Sync", systemImage: "person.crop.circle")
+                                Button {
+                                    Task {
+                                        try? await authService.signOut()
+                                        syncService.setCloudSyncEnabled(false)
+                                    }
+                                } label: {
+                                    Label("Sign Out", systemImage: "rectangle.portrait.and.arrow.right")
+                                        .foregroundColor(.rhythmError)
+                                }
+                            } else {
+                                Text("Rhythm works locally on this device. Sign in only if you want cloud sync.")
+                                    .font(.subheadline)
+                                    .foregroundColor(.rhythmTextSecondary)
+
+                                NavigationLink {
+                                    AuthView(authService: authService)
+                                } label: {
+                                    Label("Sign In for Cloud Sync", systemImage: "person.crop.circle")
+                                }
                             }
                         }
-                    }
 
-                    // Notifications
-                    Section(Copy.Settings.notificationsSection) {
+                        // Notifications
+                        Section(Copy.Settings.notificationsSection) {
                         // Morning preview time
                         HStack {
                             Label(Copy.Settings.morningPreviewTime, systemImage: "sun.max")
@@ -96,23 +99,23 @@ struct SettingsView: View {
                         }
                     }
 
-                    calendarSection
+                        calendarSection
                     
                     // Data
-                    Section(Copy.Settings.dataSection) {
-                        Toggle(isOn: Binding(
-                            get: { syncService.isCloudSyncEnabled },
-                            set: { syncService.setCloudSyncEnabled($0) }
-                        )) {
-                            Label("Cloud Sync", systemImage: "icloud")
-                        }
-                        .disabled(!authService.isAuthenticated)
+                        Section(Copy.Settings.dataSection) {
+                            Toggle(isOn: Binding(
+                                get: { syncService.isCloudSyncEnabled },
+                                set: { syncService.setCloudSyncEnabled($0) }
+                            )) {
+                                Label("Cloud Sync", systemImage: "icloud")
+                            }
+                            .disabled(!authService.isAuthenticated)
 
-                        if !authService.isAuthenticated {
-                            Text("Cloud sync requires sign in. Your local data stays available either way.")
-                                .font(.caption)
-                                .foregroundColor(.rhythmTextMuted)
-                        }
+                            if !authService.isAuthenticated {
+                                Text("Cloud sync requires sign in. Your local data stays available either way.")
+                                    .font(.caption)
+                                    .foregroundColor(.rhythmTextMuted)
+                            }
 
                         // Sync status
                         HStack {
@@ -157,7 +160,7 @@ struct SettingsView: View {
                     }
                     
                     // About
-                    Section(Copy.Settings.aboutSection) {
+                        Section(Copy.Settings.aboutSection) {
                         // Version
                         HStack {
                             Label(Copy.Settings.version, systemImage: "info.circle")
@@ -181,9 +184,15 @@ struct SettingsView: View {
                         }
                     }
                     
-                    // Debug (only in debug builds)
-                    #if DEBUG
-                    Section("Debug") {
+                        // Debug (only in debug builds)
+                        #if DEBUG
+                        Section("Debug") {
+                        NavigationLink {
+                            DesignLabView()
+                        } label: {
+                            Label("Open Design Lab", systemImage: "paintpalette")
+                        }
+
                         Button {
                             // Reset onboarding, etc.
                         } label: {
@@ -195,13 +204,19 @@ struct SettingsView: View {
                         } label: {
                             Label("View Pending Notifications", systemImage: "bell")
                         }
+                        }
+                        #endif
                     }
-                    #endif
+                    .scrollContentBackground(.hidden)
+                    .listStyle(.plain)
+                    .listRowSeparatorTint(Color.rhythmRule(for: colorScheme))
+                    .tint(.rhythmSignal)
+                    .environment(\.defaultMinListRowHeight, 48)
                 }
-                .scrollContentBackground(.hidden)
             }
-            .navigationTitle(Copy.Settings.title)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Color.rhythmBackground(for: colorScheme), for: .navigationBar)
             .alert("Clear Completed Tasks?", isPresented: $showingClearConfirmation) {
                 Button("Cancel", role: .cancel) {}
                 Button("Clear", role: .destructive) {
@@ -215,6 +230,23 @@ struct SettingsView: View {
                 calendarService?.refreshCalendarInfo()
             }
         }
+    }
+
+    private var settingsHeader: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("SETTINGS / SYSTEM")
+                .swissSectionLabel(color: .rhythmSignal)
+
+            Text(Copy.Settings.title)
+                .font(.system(size: 36, weight: .bold))
+                .tracking(-1)
+                .foregroundStyle(Color.rhythmTextPrimary)
+
+            SwissRule(strong: true)
+        }
+        .padding(.horizontal, QuietSwiss.screenPadding)
+        .padding(.top, 12)
+        .padding(.bottom, 2)
     }
 
     @ViewBuilder

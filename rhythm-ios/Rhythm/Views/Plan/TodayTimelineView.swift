@@ -214,11 +214,11 @@ private struct TimelineSelectionOverlay: View {
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
         .frame(height: max(selection.height - 4, 32), alignment: .topLeading)
-        .background(Color.rhythmCoral.opacity(0.18))
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .background(Color.rhythmSignal.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.rhythmCoral, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                .stroke(Color.rhythmSignal, style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
         )
         .padding(.leading, leftPadding)
         .padding(.trailing, 4)
@@ -240,7 +240,7 @@ struct TimeGridBackground: View {
                 HStack(alignment: .top, spacing: 0) {
                     // Time label
                     Text(formatHour(hour))
-                        .font(.caption)
+                        .font(.caption2.monospaced())
                         .foregroundColor(.rhythmTextMuted)
                         .frame(width: timeColumnWidth, alignment: .trailing)
                         .padding(.trailing, 8)
@@ -330,9 +330,9 @@ struct TaskTimeBlock: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .frame(height: max(position.height - 4, 30))
             .background(backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                     .stroke(borderColor, lineWidth: task.isInWindow ? 2 : 0)
             )
         }

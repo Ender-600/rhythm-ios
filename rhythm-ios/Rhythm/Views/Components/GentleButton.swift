@@ -2,7 +2,7 @@
 //  GentleButton.swift
 //  Rhythm
 //
-//  Invitational button styles - warm, not commanding
+//  Quiet Swiss button styles - direct, calm, and typographic.
 //
 
 import SwiftUI
@@ -15,7 +15,7 @@ struct GentleButton: View {
     var isDisabled: Bool = false
     let action: () -> Void
     
-    enum ButtonStyle {
+    enum ButtonStyle: Equatable {
         case primary
         case secondary
         case subtle
@@ -23,18 +23,27 @@ struct GentleButton: View {
         
         var backgroundColor: Color {
             switch self {
-            case .primary: return .rhythmCoral
-            case .secondary: return .rhythmAmber.opacity(0.2)
+            case .primary: return .rhythmInk
+            case .secondary: return .clear
             case .subtle: return .clear
-            case .destructive: return .rhythmError.opacity(0.15)
+            case .destructive: return .clear
             }
         }
         
         var foregroundColor: Color {
             switch self {
-            case .primary: return .white
-            case .secondary: return .rhythmAmber
+            case .primary: return .rhythmPaper
+            case .secondary: return .rhythmInk
             case .subtle: return .rhythmTextSecondary
+            case .destructive: return .rhythmError
+            }
+        }
+
+        var borderColor: Color {
+            switch self {
+            case .primary: return .rhythmInk
+            case .secondary: return .rhythmInk
+            case .subtle: return .clear
             case .destructive: return .rhythmError
             }
         }
@@ -51,14 +60,19 @@ struct GentleButton: View {
                 }
                 
                 Text(title)
-                    .fontWeight(.medium)
+                    .font(.subheadline.weight(.bold))
+                    .tracking(0.2)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
+            .frame(minHeight: QuietSwiss.controlHeight)
             .padding(.horizontal, 20)
             .background(style.backgroundColor)
             .foregroundColor(style.foregroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(style.borderColor, lineWidth: style == .subtle ? 0 : 1)
+            }
         }
         .disabled(isDisabled || isLoading)
         .opacity(isDisabled ? 0.5 : 1)
@@ -80,7 +94,11 @@ struct GentleIconButton: View {
                 .frame(width: size, height: size)
                 .background(style.backgroundColor)
                 .foregroundColor(style.foregroundColor)
-                .clipShape(Circle())
+                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+                .overlay {
+                    RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                        .stroke(style.borderColor, lineWidth: style == .subtle ? 0 : 1)
+                }
         }
     }
 }
@@ -104,6 +122,7 @@ struct GentleTextButton: View {
                     .fontWeight(.medium)
             }
             .foregroundColor(color)
+            .font(.subheadline.weight(.bold))
         }
     }
 }
@@ -130,13 +149,13 @@ struct SnoozeButton: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .background(
-                isSelected ? Color.rhythmCoral.opacity(0.15) : Color.rhythmChipBackground
+                isSelected ? Color.rhythmSignal : Color.clear
             )
-            .foregroundColor(isSelected ? .rhythmCoral : .rhythmTextPrimary)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .foregroundColor(isSelected ? .rhythmPaper : .rhythmTextPrimary)
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isSelected ? Color.rhythmCoral : Color.clear, lineWidth: 1.5)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(isSelected ? Color.rhythmSignal : Color.rhythmRuleLight, lineWidth: 1)
             )
         }
     }
@@ -179,7 +198,11 @@ struct ActionRowButton: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .background(Color.rhythmCardLight)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+            .overlay {
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(Color.rhythmRuleLight, lineWidth: 1)
+            }
         }
     }
 }
@@ -219,4 +242,3 @@ struct ActionRowButton: View {
     }
     .padding()
 }
-

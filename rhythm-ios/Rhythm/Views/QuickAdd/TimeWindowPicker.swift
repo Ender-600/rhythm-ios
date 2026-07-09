@@ -16,8 +16,7 @@ struct TimeWindowPicker: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(Copy.QuickAdd.timeHeader)
-                .font(.subheadline)
-                .foregroundColor(.rhythmTextSecondary)
+                .swissSectionLabel()
             
             VStack(spacing: 8) {
                 ForEach(windows) { window in
@@ -67,7 +66,7 @@ struct TimeWindowOption: View {
                                 .padding(.vertical, 2)
                                 .background(Color.rhythmCoral.opacity(0.15))
                                 .foregroundColor(.rhythmCoral)
-                                .clipShape(Capsule())
+                                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                         }
                     }
                     
@@ -93,11 +92,11 @@ struct TimeWindowOption: View {
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
             .background(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                     .fill(isSelected ? Color.rhythmCoral.opacity(0.1) : Color.rhythmCardLight)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                     .stroke(isSelected ? Color.rhythmCoral : Color.clear, lineWidth: 1.5)
             )
         }
@@ -179,6 +178,9 @@ struct CustomTimePickerSheet: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.rhythmPaper)
+            .tint(.rhythmSignal)
             .navigationTitle("Pick a time")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -269,4 +271,3 @@ struct CustomTimePickerSheet: View {
     )
     .padding()
 }
-

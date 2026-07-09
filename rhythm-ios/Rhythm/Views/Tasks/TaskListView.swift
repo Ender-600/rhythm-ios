@@ -20,7 +20,7 @@ struct TaskListView: View {
     @State private var draggedTaskID: UUID?
 
     var body: some View {
-        LazyVStack(spacing: 10) {
+        LazyVStack(spacing: 0) {
             ForEach(tasks) { task in
                 TaskRowView(
                     task: task,
@@ -31,7 +31,7 @@ struct TaskListView: View {
                     onSnooze: { onTaskSnooze?(task) }
                 )
                 .opacity(draggedTaskID == task.id ? 0.55 : 1)
-                .contentShape(.dragPreview, RoundedRectangle(cornerRadius: 12))
+                .contentShape(.dragPreview, RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                 .onDrag {
                     draggedTaskID = task.id
                     return NSItemProvider(object: task.id.uuidString as NSString)
@@ -139,9 +139,10 @@ struct GroupedTaskListView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     // Group header
                     Text(group)
-                        .font(.subheadline)
-                        .fontWeight(.semibold)
+                        .font(.caption2.weight(.black))
+                        .tracking(1.4)
                         .foregroundColor(.rhythmTextSecondary)
+                        .textCase(.uppercase)
                         .padding(.horizontal, 4)
 
                     // Tasks in group

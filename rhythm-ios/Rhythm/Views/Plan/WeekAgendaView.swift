@@ -108,7 +108,7 @@ private struct AgendaDayColumnView: View {
 
             // Tasks list
             ScrollView {
-                LazyVStack(spacing: 10) {
+                LazyVStack(spacing: 8) {
                     if tasks.isEmpty {
                         emptyDayState
                     } else {
@@ -122,7 +122,7 @@ private struct AgendaDayColumnView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 6)
                 .padding(.vertical, 12)
             }
         }
@@ -130,7 +130,7 @@ private struct AgendaDayColumnView: View {
         .background(columnBackground)
         .overlay(
             Rectangle()
-                .fill(Color.rhythmTextMuted.opacity(0.15))
+                .fill(Color.rhythmRule(for: colorScheme))
                 .frame(width: 1),
             alignment: .trailing
         )
@@ -138,22 +138,22 @@ private struct AgendaDayColumnView: View {
 
     private var dayHeader: some View {
         Button(action: { onDayTap?() }) {
-            VStack(spacing: 2) {
+            VStack(alignment: .leading, spacing: 2) {
                 Text(dayLabel)
-                    .font(.caption)
-                    .fontWeight(.medium)
+                    .font(.caption2.weight(.black))
+                    .tracking(1.1)
+                    .textCase(.uppercase)
                     .foregroundColor(isToday ? .rhythmCoral : .rhythmTextSecondary)
 
                 Text("\(date.day)")
-                    .font(.title2)
-                    .fontWeight(isToday || isFocused ? .bold : .semibold)
+                    .font(.system(size: 30, weight: isToday || isFocused ? .black : .bold, design: .default))
                     .foregroundColor(isToday ? .rhythmCoral : (isPast ? .rhythmTextMuted : .rhythmTextPrimary))
 
                 Text(date.formatted(.dateTime.month(.abbreviated)))
-                    .font(.caption2)
+                    .font(.caption2.monospaced())
                     .foregroundColor(.rhythmTextMuted)
             }
-            .padding(.vertical, 12)
+            .padding(12)
             .frame(maxWidth: .infinity)
             .background(headerBackground)
             .contentShape(Rectangle())
@@ -190,12 +190,14 @@ private struct AgendaDayColumnView: View {
 
     private var emptyDayState: some View {
         VStack(spacing: 8) {
-            Image(systemName: isPast ? "checkmark.circle" : "sun.min")
-                .font(.system(size: 24))
+            Text(isPast ? "00" : "—")
+                .font(.title3.monospaced().weight(.bold))
                 .foregroundColor(.rhythmTextMuted)
 
             Text(isPast ? "All done" : "Free day")
-                .font(.caption)
+                .font(.caption2.weight(.bold))
+                .tracking(0.8)
+                .textCase(.uppercase)
                 .foregroundColor(.rhythmTextMuted)
         }
         .frame(maxWidth: .infinity)
@@ -219,10 +221,8 @@ private struct AgendaDayTaskCard: View {
                 // Time
                 if let start = task.windowStart {
                     HStack(spacing: 4) {
-                        Image(systemName: "clock")
-                            .font(.caption2)
                         Text(start.shortTimeString)
-                            .font(.caption)
+                            .font(.caption.monospaced().weight(.bold))
                     }
                     .foregroundColor(.rhythmTextSecondary)
                 }
@@ -237,12 +237,10 @@ private struct AgendaDayTaskCard: View {
 
                 // Priority indicator
                 HStack(spacing: 4) {
-                    Circle()
-                        .fill(task.priority.color)
-                        .frame(width: 6, height: 6)
-
                     Text(task.priority.rawValue.capitalized)
-                        .font(.caption2)
+                        .font(.caption2.weight(.bold))
+                        .tracking(0.6)
+                        .textCase(.uppercase)
                         .foregroundColor(.rhythmTextMuted)
 
                     Spacer()
@@ -250,11 +248,9 @@ private struct AgendaDayTaskCard: View {
                     // Status indicator
                     if task.status == .inProgress {
                         HStack(spacing: 2) {
-                            Circle()
-                                .fill(Color.rhythmCoral)
-                                .frame(width: 5, height: 5)
                             Text("Active")
-                                .font(.caption2)
+                                .font(.caption2.weight(.black))
+                                .textCase(.uppercase)
                                 .foregroundColor(.rhythmCoral)
                         }
                     }
@@ -277,11 +273,16 @@ private struct AgendaDayTaskCard: View {
             .padding(10)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(cardBackground)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
             .overlay(
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(borderColor, lineWidth: task.isInWindow ? 1.5 : 0)
+                RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                    .stroke(borderColor, lineWidth: task.isInWindow ? 2 : 1)
             )
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(task.priority.color)
+                    .frame(width: 3)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -301,7 +302,7 @@ private struct AgendaDayTaskCard: View {
         } else if task.isInWindow {
             return .rhythmAmber
         }
-        return .clear
+        return Color.rhythmRule(for: colorScheme)
     }
 }
 

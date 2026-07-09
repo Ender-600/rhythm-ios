@@ -58,7 +58,7 @@ struct AddTaskSheet: View {
                         // Notes (optional)
                         notesSection
                     }
-                    .padding(.horizontal, 20)
+                    .padding(.horizontal, QuietSwiss.screenPadding)
                     .padding(.top, 20)
                     .padding(.bottom, 100)
                 }
@@ -95,7 +95,7 @@ struct AddTaskSheet: View {
                 .font(.body)
                 .padding()
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
                 .focused($focusedField, equals: .title)
         }
     }
@@ -135,9 +135,9 @@ struct AddTaskSheet: View {
                         ? .rhythmCoral
                         : .rhythmTextPrimary
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                         .stroke(estimatedMinutes == mins ? Color.rhythmCoral : Color.clear, lineWidth: 1.5)
                 )
         }
@@ -174,7 +174,7 @@ struct AddTaskSheet: View {
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.rhythmCard(for: colorScheme))
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .swissSurface()
         }
     }
     
@@ -211,9 +211,9 @@ struct AddTaskSheet: View {
                         ? p.color
                         : .rhythmTextPrimary
                 )
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                         .stroke(priority == p ? p.color : Color.clear, lineWidth: 1.5)
                 )
         }
@@ -229,7 +229,7 @@ struct AddTaskSheet: View {
                 .font(.body)
                 .padding()
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
                 .focused($focusedField, equals: .openingAction)
         }
     }
@@ -245,7 +245,7 @@ struct AddTaskSheet: View {
                 .lineLimit(3...6)
                 .padding()
                 .background(Color.rhythmCard(for: colorScheme))
-                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .swissSurface()
                 .focused($focusedField, equals: .notes)
         }
     }
@@ -259,8 +259,10 @@ struct AddTaskSheet: View {
                 .font(.subheadline)
             
             Text(text)
-                .font(.subheadline)
+                .font(.caption2.weight(.black))
+                .tracking(1.3)
                 .foregroundColor(.rhythmTextPrimary)
+                .textCase(.uppercase)
             
             if !required {
                 Text("(optional)")
@@ -284,10 +286,10 @@ struct AddTaskSheet: View {
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .background(
-            Color.rhythmBackground(for: colorScheme)
-                .shadow(color: .black.opacity(0.1), radius: 10, y: -5)
-        )
+        .background(Color.rhythmBackground(for: colorScheme))
+        .overlay(alignment: .top) {
+            SwissRule()
+        }
     }
     
     // MARK: - Actions

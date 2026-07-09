@@ -58,18 +58,18 @@ struct ChipView: View {
                 .font(.subheadline)
                 .fontWeight(.medium)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
         .background(
             isSelected ? style.foregroundColor.opacity(0.3) : style.backgroundColor
         )
         .foregroundColor(style.foregroundColor)
-        .clipShape(Capsule())
+        .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
         .overlay(
-            Capsule()
+            RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
                 .stroke(
                     isSelected ? style.foregroundColor : Color.clear,
-                    lineWidth: 1.5
+                    lineWidth: 1
                 )
         )
         .onTapGesture {
@@ -208,4 +208,3 @@ struct FlowLayout: Layout {
     }
     .padding()
 }
-

@@ -21,6 +21,8 @@ struct TasksView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
+                    tasksHeader
+
                     // Content
                     if viewModel.isLoading {
                         LoadingView(message: "Loading tasks...")
@@ -31,8 +33,8 @@ struct TasksView: View {
                     }
                 }
             }
-            .navigationTitle(Copy.Tasks.title)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .refreshable {
                 await viewModel.refresh()
             }
@@ -70,17 +72,42 @@ struct TasksView: View {
             .sheet(isPresented: $viewModel.showingAddSheet) {
                 AddTaskSheet(viewModel: viewModel)
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        viewModel.showingAddSheet = true
-                    } label: {
-                        Image(systemName: "plus")
-                            .foregroundColor(.rhythmCoral)
-                    }
-                }
-            }
         }
+    }
+
+    private var tasksHeader: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .bottom) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("TASKS / PRIORITY")
+                        .swissSectionLabel(color: .rhythmSignal)
+
+                    Text(Copy.Tasks.title)
+                        .font(.system(size: 36, weight: .bold))
+                        .tracking(-1)
+                        .foregroundStyle(Color.rhythmTextPrimary)
+                }
+
+                Spacer()
+
+                Button {
+                    viewModel.showingAddSheet = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.body.weight(.black))
+                        .frame(width: 44, height: 44)
+                        .foregroundStyle(Color.rhythmPaper)
+                        .background(Color.rhythmInk)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Add task")
+            }
+
+            SwissRule(strong: true)
+        }
+        .padding(.horizontal, QuietSwiss.screenPadding)
+        .padding(.top, 12)
+        .padding(.bottom, 8)
     }
     
     // MARK: - Task Content
@@ -111,7 +138,7 @@ struct TasksView: View {
                     viewModel.moveTasks(from: source, to: destination)
                 }
             )
-            .padding(.horizontal, 20)
+            .padding(.horizontal, QuietSwiss.screenPadding)
             .padding(.top, 8)
             .padding(.bottom, 100)
         }
@@ -151,8 +178,8 @@ struct CompletionSheet: View {
                 // Header
                 VStack(spacing: 8) {
                     Text(Copy.Completion.title)
-                        .font(.title3)
-                        .fontWeight(.semibold)
+                        .font(.system(size: 26, weight: .bold))
+                        .tracking(-0.5)
                     
                     Text(Copy.Completion.subtitle)
                         .font(.subheadline)
@@ -167,14 +194,17 @@ struct CompletionSheet: View {
                     .padding()
                     .frame(maxWidth: .infinity)
                     .background(Color.rhythmSuccess.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                            .stroke(Color.rhythmRuleLight, lineWidth: 1)
+                    }
                     .padding(.horizontal)
                 
                 // Duration input
                 VStack(alignment: .leading, spacing: 8) {
                     Text(Copy.Completion.durationQuestion)
-                        .font(.subheadline)
-                        .foregroundColor(.rhythmTextSecondary)
+                        .swissSectionLabel()
                     
                     HStack {
                         ForEach([15, 30, 45, 60, 90], id: \.self) { mins in
@@ -196,7 +226,11 @@ struct CompletionSheet: View {
                                             ? .rhythmCoral
                                             : .rhythmTextPrimary
                                     )
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                                            .stroke(Color.rhythmRuleLight, lineWidth: 1)
+                                    }
                             }
                         }
                     }
@@ -206,8 +240,7 @@ struct CompletionSheet: View {
                 // Feeling selector
                 VStack(alignment: .leading, spacing: 8) {
                     Text(Copy.Completion.feelingQuestion)
-                        .font(.subheadline)
-                        .foregroundColor(.rhythmTextSecondary)
+                        .swissSectionLabel()
                     
                     HStack(spacing: 12) {
                         ForEach(feelings, id: \.0) { feeling, emoji in
@@ -232,7 +265,11 @@ struct CompletionSheet: View {
                                         ? .rhythmCoral
                                         : .rhythmTextPrimary
                                 )
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .clipShape(RoundedRectangle(cornerRadius: QuietSwiss.compactRadius))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: QuietSwiss.compactRadius)
+                                        .stroke(Color.rhythmRuleLight, lineWidth: 1)
+                                }
                             }
                         }
                     }
