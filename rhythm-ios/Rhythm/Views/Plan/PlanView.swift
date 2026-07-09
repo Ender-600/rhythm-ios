@@ -24,14 +24,16 @@ struct PlanView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    // Header and current calendar precision
-                    VStack(alignment: .leading, spacing: 14) {
-                        headerSection
-                        zoomControl
+                    if viewModel.zoomLevel != .day {
+                        // Week and month retain explicit calendar navigation.
+                        VStack(alignment: .leading, spacing: 14) {
+                            headerSection
+                            zoomControl
+                        }
+                        .padding(.horizontal, QuietSwiss.screenPadding)
+                        .padding(.top, 16)
+                        .padding(.bottom, 12)
                     }
-                    .padding(.horizontal, QuietSwiss.screenPadding)
-                    .padding(.top, 16)
-                    .padding(.bottom, 12)
                     
                     // Plan content (takes remaining space)
                     if viewModel.isLoading {
@@ -154,7 +156,7 @@ struct PlanView: View {
     private var planContent: some View {
         switch viewModel.zoomLevel {
         case .day:
-            TodayTimelineView(
+            TodayPlanAgendaView(
                 date: viewModel.focusedDate,
                 tasks: viewModel.focusedDayTasks,
                 onTaskTap: { task in

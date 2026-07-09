@@ -10,7 +10,6 @@ import SwiftUI
 
 struct MainTabView: View {
     @Environment(\.modelContext) private var modelContext
-    @Environment(\.colorScheme) private var colorScheme
     
     // Services (injected from app)
     let speechService: SpeechService
@@ -97,10 +96,6 @@ struct MainTabView: View {
                 .tag(Tab.settings)
         }
         .tint(.rhythmSignal)
-        .toolbar(.hidden, for: .tabBar)
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            swissTabBar
-        }
         .onAppear {
             setupViewModels()
             
@@ -109,45 +104,6 @@ struct MainTabView: View {
         }
     }
 
-    private var swissTabBar: some View {
-        VStack(spacing: 0) {
-            SwissRule(strong: true)
-
-            HStack(spacing: 0) {
-                ForEach(Tab.allCases, id: \.self) { tab in
-                    Button {
-                        selectedTab = tab
-                    } label: {
-                        VStack(spacing: 5) {
-                            Image(systemName: selectedTab == tab ? tab.selectedIcon : tab.icon)
-                                .font(.system(size: 17, weight: .bold))
-                                .frame(height: 20)
-
-                            Text(tab.rawValue.uppercased())
-                                .font(.system(size: 9, weight: .black, design: .monospaced))
-                                .tracking(0.5)
-                        }
-                        .foregroundStyle(selectedTab == tab ? Color.rhythmSignal : Color.rhythmTextPrimary)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .overlay(alignment: .top) {
-                            if selectedTab == tab {
-                                Rectangle()
-                                    .fill(Color.rhythmSignal)
-                                    .frame(height: 3)
-                            }
-                        }
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(tab.rawValue)
-                    .accessibilityAddTraits(selectedTab == tab ? .isSelected : [])
-                }
-            }
-            .frame(height: 62)
-            .background(Color.rhythmBackground(for: colorScheme))
-        }
-    }
-    
     private func setupViewModels() {
         // Quick Add
         if quickAddViewModel == nil {
