@@ -46,7 +46,8 @@ Start the backend from the repo root:
 
 ```bash
 cd rhythm-backend
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv sync
+uv run --env-file .env uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### 3. Build and Run

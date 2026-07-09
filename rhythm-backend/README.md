@@ -10,25 +10,24 @@ Initial Python LLM backend for the voice quick-add flow.
 
 ```bash
 cd rhythm-backend
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
 
 Set LLM provider config:
 
 ```bash
-export OPENAI_API_KEY="your-key"
-export OPENAI_BASE_URL="https://api.openai.com/v1"
-export LLM_MODEL="gpt-4o-mini"
+cp .env.example .env
 ```
+
+Then edit `.env` and set `OPENAI_API_KEY`. `uv` creates and manages the local
+`.venv` automatically from `pyproject.toml` and `uv.lock`.
 
 The API is OpenAI-compatible. You can point `OPENAI_BASE_URL` and `LLM_MODEL` at another compatible provider.
 
 ## Run
 
 ```bash
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run --env-file .env uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 Health check:
