@@ -127,9 +127,15 @@ struct SettingsView: View {
                         }
                     }
                     
-                    // Debug (only in debug builds)
+                        // Debug (only in debug builds)
                         #if DEBUG
                         Section("Debug") {
+                        NavigationLink {
+                            DesignLabView()
+                        } label: {
+                            Label("Open Design Lab", systemImage: "paintpalette")
+                        }
+
                         Button {
                             // Reset onboarding, etc.
                         } label: {

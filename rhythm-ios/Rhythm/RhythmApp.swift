@@ -54,32 +54,47 @@ struct RhythmApp: App {
     }
     var body: some Scene {
         WindowGroup {
-            if authService.isAuthenticated {
-                MainTabView(
-                    speechService: speechService,
-                    eventLogService: eventLogService,
-                    notificationScheduler: notificationScheduler,
-                    calendarService: calendarService,
-                    syncService: syncService
-                )
-                .modelContainer(sharedModelContainer)
-                .onAppear {
-                    setupApp()
-                    syncService.configure(with: sharedModelContainer.mainContext)
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .quickAddIntentTriggered)) { _ in
-                    // Handle Quick Add intent
-                    handleQuickAddIntent()
-                }
-                .onReceive(NotificationCenter.default.publisher(for: .addTaskIntentTriggered)) { notification in
-                    // Handle Add Task intent with title
-                    if let title = notification.userInfo?["title"] as? String {
-                        handleAddTaskIntent(title: title)
-                    }
+            #if DEBUG
+            if ProcessInfo.processInfo.arguments.contains("-designLab") {
+                NavigationStack {
+                    DesignLabView()
                 }
             } else {
-                AuthView(authService: authService)
+                appContent
             }
+            #else
+            appContent
+            #endif
+        }
+    }
+
+    @ViewBuilder
+    private var appContent: some View {
+        if authService.isAuthenticated {
+            MainTabView(
+                speechService: speechService,
+                eventLogService: eventLogService,
+                notificationScheduler: notificationScheduler,
+                calendarService: calendarService,
+                syncService: syncService
+            )
+            .modelContainer(sharedModelContainer)
+            .onAppear {
+                setupApp()
+                syncService.configure(with: sharedModelContainer.mainContext)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .quickAddIntentTriggered)) { _ in
+                // Handle Quick Add intent
+                handleQuickAddIntent()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .addTaskIntentTriggered)) { notification in
+                // Handle Add Task intent with title
+                if let title = notification.userInfo?["title"] as? String {
+                    handleAddTaskIntent(title: title)
+                }
+            }
+        } else {
+            AuthView(authService: authService)
         }
     }
     
