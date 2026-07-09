@@ -332,18 +332,22 @@ struct LLMUpdateTaskData: Codable {
 // MARK: - Intent Parsing Helpers
 
 extension LLMIntentResponse {
+    private func parseISODate(_ value: String?) -> Date? {
+        guard let value else { return nil }
+
+        let fractionalFormatter = ISO8601DateFormatter()
+        fractionalFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fractionalFormatter.date(from: value) {
+            return date
+        }
+
+        let standardFormatter = ISO8601DateFormatter()
+        standardFormatter.formatOptions = [.withInternetDateTime]
+        return standardFormatter.date(from: value)
+    }
+
     /// Convert LLM response to VoiceIntentResult (supports multiple intents)
     func toVoiceIntentResult(rawUtterance: String) -> VoiceIntentResult {
-        let dateFormatter = ISO8601DateFormatter()
-        dateFormatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let fallbackDateFormatter = ISO8601DateFormatter()
-        fallbackDateFormatter.formatOptions = [.withInternetDateTime]
-
-        func parseDate(_ value: String?) -> Date? {
-            guard let value else { return nil }
-            return dateFormatter.date(from: value) ?? fallbackDateFormatter.date(from: value)
-        }
-        
         // Parse all create intents
         var createIntents: [CreateTaskIntent] = []
         if let createTasks = createTasks {
@@ -351,8 +355,8 @@ extension LLMIntentResponse {
                 // Parse schedule window
                 var scheduleWindow: ScheduleWindow? = nil
                 if let desc = data.scheduleDescription {
-                    let startDate = parseDate(data.scheduleStart)
-                    let endDate = parseDate(data.scheduleEnd)
+                    let startDate = parseISODate(data.scheduleStart)
+                    let endDate = parseISODate(data.scheduleEnd)
                     scheduleWindow = ScheduleWindow(
                         start: startDate,
                         end: endDate,
@@ -362,7 +366,7 @@ extension LLMIntentResponse {
                 }
                 
                 // Parse deadline
-                let deadline = parseDate(data.deadline)
+                let deadline = parseISODate(data.deadline)
                 
                 // Parse priority
                 let priority = TaskPriority(rawValue: data.priority ?? "normal") ?? .normal
@@ -403,8 +407,8 @@ extension LLMIntentResponse {
                 if action == .snooze || action == .reschedule {
                     var newSchedule: ScheduleWindow? = nil
                     if let desc = data.newScheduleDescription {
-                        let startDate = parseDate(data.newScheduleStart)
-                        let endDate = parseDate(data.newScheduleEnd)
+                        let startDate = parseISODate(data.newScheduleStart)
+                        let endDate = parseISODate(data.newScheduleEnd)
                         newSchedule = ScheduleWindow(
                             start: startDate,
                             end: endDate,
@@ -413,7 +417,7 @@ extension LLMIntentResponse {
                         )
                     }
                     
-                    let snoozeUntil = parseDate(data.snoozeUntil)
+                    let snoozeUntil = parseISODate(data.snoozeUntil)
                     let snoozeDuration = data.snoozeDuration.map { TimeInterval($0 * 60) }
                     
                     parameters = ActionParameters(

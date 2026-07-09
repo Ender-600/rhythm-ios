@@ -68,7 +68,6 @@ final class LLMService {
     // MARK: - Types
     
     enum LLMError: LocalizedError {
-        case noAPIKey
         case networkError(String)
         case invalidResponse
         case parsingFailed(String)
@@ -77,8 +76,6 @@ final class LLMService {
         
         var errorDescription: String? {
             switch self {
-            case .noAPIKey:
-                return "Backend is not configured"
             case .networkError(let msg):
                 return "Network error: \(msg)"
             case .invalidResponse:
@@ -92,7 +89,7 @@ final class LLMService {
             }
         }
     }
-    
+
     // MARK: - Initialization
     
     init(
@@ -177,148 +174,6 @@ final class LLMService {
         } catch {
             throw LLMError.parsingFailed(error.localizedDescription)
         }
-    }
-    
-    // MARK: - Prompt Building
-    
-    private func buildSystemPrompt(existingTasks: [RhythmTask]) -> String {
-        let now = Date()
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-        let currentTime = formatter.string(from: now)
-        
-        let weekdayFormatter = DateFormatter()
-        weekdayFormatter.dateFormat = "EEEE"
-        let weekday = weekdayFormatter.string(from: now)
-        
-        var prompt = """
-        You are an intent parser for a task management app called Rhythm. Your job is to understand the user's voice command and extract structured data.
-        
-        **IMPORTANT**: A single voice command can contain MULTIPLE intents - both creating new tasks AND updating existing tasks. Parse ALL intents in the utterance.
-        
-        Current time: \(currentTime) (\(weekday))
-        
-        ## Response Format
-        
-        Always respond with this JSON structure (arrays can have 0 or more items):
-        ```json
-        {
-            "create_tasks": [
-                {
-                    "title": "concise task title",
-                    "schedule_description": "this evening" or "tomorrow morning" etc,
-                    "schedule_start": "ISO8601 datetime or null",
-                    "schedule_end": "ISO8601 datetime or null",
-                    "deadline": "ISO8601 datetime or null",
-                    "priority": "urgent" | "normal" | "low",
-                    "note": "any additional context or null",
-                    "is_flexible": true/false
-                }
-            ],
-            "update_tasks": [
-                {
-                    "action": "task_started" | "task_paused" | "task_resumed" | "task_completed" | "task_skipped" | "task_deleted" | "task_snoozed" | "task_rescheduled",
-                    "target_description": "description of which task(s)",
-                    "title_keywords": ["keywords", "from", "title"],
-                    "time_reference": "the morning task" or null,
-                    "status_filter": "not_started" | "in_progress" | "done" or null,
-                    "is_multiple": false,
-                    "snooze_duration": minutes as integer or null,
-                    "snooze_until": "ISO8601 datetime or null",
-                    "new_schedule_description": "for reschedule" or null,
-                    "new_schedule_start": "ISO8601 or null",
-                    "new_schedule_end": "ISO8601 or null",
-                    "reason": "reason for action or null"
-                }
-            ],
-            "confidence": 0.0-1.0
-        }
-        ```
-        
-        ## Examples
-        
-        **Example 1 - Single create:**
-        "帮我安排今晚看那本新书"
-        → create_tasks: [{ title: "看那本新书", schedule_description: "tonight", ... }]
-        → update_tasks: []
-        
-        **Example 2 - Single update:**
-        "把购物任务标记为完成"
-        → create_tasks: []
-        → update_tasks: [{ action: "task_completed", title_keywords: ["购物"], ... }]
-        
-        **Example 3 - Multiple creates:**
-        "明天要去银行还要去超市买菜"
-        → create_tasks: [
-            { title: "去银行", schedule_description: "tomorrow", ... },
-            { title: "去超市买菜", schedule_description: "tomorrow", ... }
-        ]
-        → update_tasks: []
-        
-        **Example 4 - Mixed (create + update):**
-        "添加一个下午开会的提醒，然后把邮件任务标记完成"
-        → create_tasks: [{ title: "开会", schedule_description: "this afternoon", ... }]
-        → update_tasks: [{ action: "task_completed", title_keywords: ["邮件"], ... }]
-        
-        **Example 5 - Multiple updates:**
-        "把早上的任务都跳过，然后开始做作业那个任务"
-        → create_tasks: []
-        → update_tasks: [
-            { action: "task_skipped", time_reference: "morning", is_multiple: true, ... },
-            { action: "task_started", title_keywords: ["作业"], ... }
-        ]
-        
-        ## Guidelines
-        
-        1. **Title extraction**: Create a clear, concise title (3-8 words) that captures the essence of the task.
-        
-        2. **Time parsing**: 
-           - "tonight", "this evening", "今晚" → same day evening (6pm-10pm)
-           - "tomorrow morning", "明天早上" → next day 8am-12pm
-           - "in an hour", "一小时后" → current time + 1 hour
-           - "around 3", "大概3点" → 3pm with is_flexible=true
-           - "at 3", "3点" → 3pm with is_flexible=false
-           - "by Friday", "周五前" → deadline
-        
-        3. **Priority inference**:
-           - "urgent", "important", "asap", "must", "紧急", "重要" → urgent
-           - "whenever", "if possible", "low priority", "有空", "可能的话" → low
-           - Default → normal
-        
-        4. **Action detection for updates**:
-           - "start", "begin", "开始", "做" → task_started
-           - "pause", "stop", "暂停" → task_paused
-           - "continue", "resume", "继续" → task_resumed
-           - "done", "finished", "complete", "完成", "做完了" → task_completed
-           - "skip", "not today", "跳过", "今天不做" → task_skipped
-           - "delete", "remove", "删除", "取消" → task_deleted
-           - "snooze", "later", "稍后", "等会" → task_snoozed
-           - "move to", "reschedule", "改到", "推迟" → task_rescheduled
-        
-        5. **Task identification**: Use keywords, time references, or status to identify which task(s).
-        
-        6. **Multiple intents**: Parse ALL intents in the utterance. Look for conjunctions like "and", "then", "also", "还要", "然后", "顺便".
-        """
-        
-        // Add existing tasks context if available
-        if !existingTasks.isEmpty {
-            prompt += "\n\n## Existing Tasks (for update matching):\n"
-            for task in existingTasks.prefix(10) {
-                let statusStr = task.status.rawValue
-                let timeStr = task.windowStart.map { formatter.string(from: $0) } ?? "no time set"
-                prompt += "- \"\(task.title)\" [\(statusStr)] (\(timeStr))\n"
-            }
-        }
-        
-        return prompt
-    }
-    
-    private func buildUserPrompt(utterance: String) -> String {
-        return """
-        Parse this voice command and return the appropriate JSON:
-        
-        "\(utterance)"
-        """
     }
     
     // MARK: - Fallback Generation

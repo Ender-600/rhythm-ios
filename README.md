@@ -21,4 +21,4 @@ open Rhythm.xcodeproj
 
 ## rhythm-backend
 
-Backend API for planning, parsing, and sync. Under active development.
+Python backend API for voice parsing, LLM calls, planning, and sync. See [rhythm-backend/README.md](rhythm-backend/README.md) for setup.
